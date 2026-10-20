@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAISY Post Studio</title>
+<link rel="icon" href="assets/logo/ptit.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="templates.css">
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<script src="presets.js"></script>
+<script src="templates.js"></script>
+<style>
+/* ---------- studio UI (not exported) ---------- */
+:root{--cream:#FBF7F2;--line:rgba(26,11,13,.09);--muted:#7A6A6C;--petal:#FBE1DC;--red-d:#A30010;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E6E0D9;font:14px/1.45 'Be Vietnam Pro',system-ui,sans-serif;color:var(--ink);height:100vh;display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;background:var(--ink);color:#fff}
+.brand{display:flex;align-items:center;gap:8px;font-weight:900;letter-spacing:.03em;font-size:17px;color:#fff}
+.brand svg{width:22px;height:22px}
+.brand span{font-weight:500;opacity:.6}
+.top .sp{flex:1}
+.btn{font:600 12px var(--mono);background:none;border:1px solid currentColor;border-radius:99px;padding:7px 14px;opacity:.88;white-space:nowrap}
+.btn:hover{opacity:1}
+.btn.pri{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+.btn.sm{padding:4px 10px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:wait}
+.app{flex:1;min-height:0;display:flex}
+.side{width:440px;flex:none;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:16px 16px 60px;display:flex;flex-direction:column;gap:14px}
+.stage{flex:1;min-width:0;overflow:auto;padding:18px 20px 60px}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.row>select,.row>input{flex:1;min-width:0}
+.hint{font-size:12px;color:var(--muted)}
+.warn{font-size:12px;background:var(--petal);color:var(--red-d);padding:8px 10px;border-radius:8px}
+code{font:12px var(--mono)}
+select,input,textarea{width:100%;border:1px solid #0002;border-radius:8px;padding:7px 9px;background:#fff}
+textarea{resize:vertical;min-height:54px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--red);outline-offset:-1px;border-color:transparent}
+.f{display:flex;flex-direction:column;gap:5px}
+.f>label{font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.f-check>label{display:flex;gap:8px;align-items:center;cursor:pointer;text-transform:none;letter-spacing:0;font:500 13px 'Be Vietnam Pro',sans-serif;color:var(--ink)}
+.f-check input{width:16px;height:16px;accent-color:var(--red)}
+form{display:flex;flex-direction:column;gap:14px}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--cream)}
+.ihd{display:flex;align-items:center;gap:6px;font:700 12px var(--mono);color:var(--red)}
+.ihd b{flex:1}
+.ib{width:26px;height:26px;border:1px solid #0002;border-radius:50%;background:#fff;font-size:12px;line-height:1;flex:none}
+.ib:hover{border-color:var(--red);color:var(--red)}
+.prow{display:grid;grid-template-columns:44px 1fr auto;gap:6px;align-items:center}
+.prow .in{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prow .in input{padding:5px 8px}
+.prow .acts{display:flex;flex-direction:column;gap:2px}
+.prow .acts .ib{width:22px;height:22px;font-size:10px}
+.ph{width:44px;height:44px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:800;cursor:pointer;overflow:hidden;position:relative}
+.ph::before{content:attr(data-i)}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.ph.has img{display:block}
+.ph::after{content:'+';position:absolute;right:0;bottom:0;width:16px;height:16px;border-radius:50%;background:var(--ink);font-size:12px;line-height:16px;text-align:center}
+.lib summary{cursor:pointer;font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lib .prow{grid-template-columns:32px 1fr auto;margin-top:8px}
+.lib .ph{width:32px;height:32px;font-size:12px;cursor:default}
+.lib .ph::after{display:none}
+.ratios{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.ratios button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;border:1px solid #0002;background:#fff;border-radius:10px;padding:6px 12px;text-align:left}
+.ratios button b{font:700 13px var(--mono)}
+.ratios button small{font-size:11px;color:var(--muted)}
+.ratios button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ratios button.on small{color:#fffa}
+.slides{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px}
+.slide{display:flex;flex-direction:column;gap:8px}
+.frame{overflow:hidden;box-shadow:0 12px 32px #0002;border-radius:4px;background:var(--cream)}
+.cap{display:flex;justify-content:space-between;align-items:center;gap:8px;font:12px var(--mono)}
+@media (max-width:860px){
+  body{height:auto}
+  .app{flex-direction:column}
+  .side{width:auto;overflow:visible;border-right:0;padding-bottom:20px}
+  .stage{overflow:visible;padding:16px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span id="brandIcon"></span>DAISY <span>Post Studio</span></div>
+  <span class="sp"></span>
+  <button class="btn" id="open">Open file</button>
+  <input type="file" id="openFile" accept=".json,application/json" hidden>
+  <button class="btn" id="save">Save file</button>
+  <button class="btn pri" id="exp">Export PNG</button>
+</header>
+<div class="app">
+  <aside class="side">
+    <div class="f">
+      <label>Posts</label>
+      <div class="row"><select id="postSel" aria-label="Post being edited"></select></div>
+      <div class="row">
+        <select id="newType" aria-label="New post type"></select>
+        <button class="btn sm" id="add">+ New post</button>
+        <button class="btn sm" id="dup">Duplicate</button>
+        <button class="btn sm" id="del">Delete</button>
+      </div>
+    </div>
+    <p class="warn" id="logoWarn" hidden>No lab logo yet. Put the file at <code>assets/logo/daisy.svg</code>; until then the posters use a “DAISY” wordmark.</p>
+    <form id="form" onsubmit="return false"></form>
+    <p class="hint">Click a square photo to upload one. Typing a name that is already in the library fills in the photo and role.</p>
+    <details class="lib"><summary id="libSum">Member library</summary><div id="lib"></div></details>
+  </aside>
+  <main class="stage">
+    <div class="ratios" id="ratios"></div>
+    <p class="hint" id="ratioHint"></p>
+    <div class="slides" id="slides"></div>
+  </main>
+</div>
+<datalist id="names"></datalist>
+<datalist id="notes"><option>Oral</option><option>Poster</option><option>Best Paper</option><option>Q1</option><option>Scopus</option></datalist>
+
+<script>
+const PRESET = window.DAISY_PRESET || { members: {}, examples: [] };
+const PIXEL_RATIO = 2;
+const RATIO_INFO = {
+  '4:5': 'Portrait · best for the Facebook feed (takes the most screen)',
+  '1:1': 'Square · safe anywhere, including multi-photo albums',
+  '1.91:1': 'Landscape · the widest frame Facebook shows uncropped (links, events)',
+  '16:9': 'Landscape · screens, slides, event covers',
+  '3:2': 'Landscape · taller, fits more people',
+};
+const TYPES = { paper: 'Accepted paper', welcome: 'New members', event: 'Seminar / event', recruit: 'Recruitment', award: 'Award' };
+
+// ---------- form schema: [path, kind, label, opts] ----------
+const blankPerson = () => ({ name: '', role: '' });
+const FORMS = {
+  paper: [
+    ['venue.short', 'text', 'Venue: short name', { ph: 'SOICT, ATC, IEEE Access…' }],
+    ['venue.year', 'text', 'Year', { ph: '2026' }],
+    ['venue.full', 'textarea', 'Full conference / journal name', { ph: 'International Symposium on Information and Communication Technology' }],
+    ['venue.note', 'text', 'Presentation type', { ph: 'Oral, Poster…', list: 'notes' }],
+    ['split', 'check', 'Split into several images (album) instead of up to 4 papers in one'],
+    ['papers', 'list', 'Papers', { add: '+ Add paper', blank: () => ({ title: '', authors: [blankPerson()], advisors: [] }), item: [
+      ['title', 'textarea', 'Paper title'],
+      ['venue', 'text', 'Own venue (only if different from the others)', { ph: 'e.g. IEEE Access 2026' }],
+      ['authors', 'people', 'Authors and co-authors (in order)'],
+      ['advisors', 'people', 'Advisors'],
+    ] }]],
+  welcome: [
+    ['title', 'text', 'Title (leave empty to write it from the head count)', { ph: 'Welcome to our 4 new members' }],
+    ['subtitle', 'textarea', 'Description'],
+    ['term', 'text', 'Intake', { ph: 'Fall 2026' }],
+    ['members', 'people', 'New members', { interest: true }]],
+  event: [
+    ['tag', 'text', 'Series', { ph: 'DAISY Seminar #01' }],
+    ['format', 'text', 'Format', { ph: 'In person / Online' }],
+    ['title', 'textarea', 'Title'],
+    ['desc', 'textarea', 'Description'],
+    ['speakers', 'people', 'Speakers'],
+    ['date', 'date', 'Date'],
+    ['time', 'text', 'Time', { ph: '2:00 – 4:00 PM' }],
+    ['place', 'text', 'Place']],
+  recruit: [
+    ['headline', 'text', 'Headline', { ph: 'Join DAISY Lab' }],
+    ['term', 'text', 'Intake', { ph: 'Fall 2026' }],
+    ['intro', 'textarea', 'Intro'],
+    ['areas', 'lines', 'Research areas (one per line)'],
+    ['requirements', 'lines', 'Requirements (one per line)'],
+    ['contact', 'text', 'Contact / application link'],
+    ['deadline', 'text', 'Deadline']],
+  award: [
+    ['award', 'text', 'Award', { ph: 'Second Prize' }],
+    ['event', 'text', 'Competition'],
+    ['project', 'textarea', 'Project title'],
+    ['members', 'people', 'Team members'],
+    ['advisors', 'people', 'Advisors']],
+};
+const BLANK = {
+  paper: () => ({ venue: { short: '', year: String(new Date().getFullYear()), full: '', note: '' }, papers: [FORMS.paper.find(f => f[0] === 'papers')[3].blank()] }),
+  welcome: () => ({ title: '', members: [blankPerson()] }),
+  event: () => ({ speakers: [blankPerson()] }),
+  recruit: () => ({ headline: 'Join DAISY Lab', areas: [], requirements: [] }),
+  award: () => ({ members: [blankPerson()], advisors: [] }),
+};
+const newPost = type => ({ type, ...BLANK[type]() });
+
+// ---------- state + IndexedDB ----------
+let S = { posts: [], library: {}, cur: 0, ratio: '4:5' };
+const P = () => S.posts[S.cur];
+const idb = (() => {
+  let db;
+  const open = () => db ??= new Promise((ok, no) => {
+    const r = indexedDB.open('daisy-studio', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error);
+  });
+  const tx = async (mode, fn) => { const d = await open(); return new Promise((ok, no) => {
+    const t = d.transaction('kv', mode), q = fn(t.objectStore('kv'));
+    t.oncomplete = () => ok(q.result); t.onerror = () => no(t.error);
+  }); };
+  return { get: k => tx('readonly', s => s.get(k)), set: (k, v) => tx('readwrite', s => s.put(v, k)) };
+})();
+let saveT;
+const save = () => { clearTimeout(saveT); saveT = setTimeout(() => idb.set('state', S).catch(e => console.warn('Could not save to browser storage', e)), 300); };
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const h = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const btn = (cls, text, fn, title) => { const b = h('button', cls, text); b.type = 'button'; b.onclick = fn; if (title) b.title = title; return b; };
+const getP = (o, p) => p.split('.').reduce((a, k) => a?.[k], o);
+const setP = (o, p, v) => { const ks = p.split('.'), last = ks.pop(); ks.reduce((a, k) => a[k] ??= {}, o)[last] = v; };
+const arrP = (o, p) => { let a = getP(o, p); if (!Array.isArray(a)) setP(o, p, a = []); return a; };
+const move = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; changed(true); };
+const libGet = name => S.library[name] || PRESET.members[name];
+
+// Square crop + resize to 600px -> JPEG dataURL (~60KB)
+// ponytail: crop sits 30% from the top because faces are in the upper half; add a drag/zoom UI if that misses
+async function squarePhoto(file, size = 600) {
+  const bmp = await createImageBitmap(file);
+  const s = Math.min(bmp.width, bmp.height), c = h('canvas');
+  c.width = c.height = Math.min(size, s);
+  c.getContext('2d').drawImage(bmp, (bmp.width - s) / 2, (bmp.height - s) * 0.3, s, s, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.85);
+}
+
+function remember(p) {
+  const k = (p.name || '').trim();
+  if (!k) return;
+  const old = S.library[k] || {};
+  S.library[k] = { ...old, role: p.role || old.role || '', ...(p.photo ? { photo: p.photo } : {}), ...(p.interest ? { interest: p.interest } : {}) };
+  refreshLib(); save();
+}
+
+// ---------- form ----------
+function changed(rebuild) {
+  if (rebuild) buildForm();
+  refreshPostSel(); schedulePreview(); save();
+}
+
+function buildForm() {
+  const post = P();
+  $('form').replaceChildren(...(post ? FORMS[post.type].map(f => field(post, ...f)) : []));
+}
+
+function field(obj, path, kind, label, o = {}) {
+  const wrap = h('div', `f f-${kind}`);
+  wrap.append(h('label', '', label));
+  if (kind === 'list') {
+    const arr = arrP(obj, path);
+    arr.forEach((it, i) => {
+      const box = h('div', 'item'), hd = h('div', 'ihd');
+      hd.append(h('b', '', `#${i + 1}`), btn('ib', '↑', () => move(arr, i, -1), 'Move up'), btn('ib', '↓', () => move(arr, i, 1), 'Move down'),
+        btn('ib', '×', () => { if (confirm('Delete this item?')) { arr.splice(i, 1); changed(true); } }, 'Delete'));
+      box.append(hd, ...o.item.map(f => field(it, ...f)));
+      wrap.append(box);
+    });
+    wrap.append(btn('btn sm', o.add, () => { arr.push(o.blank()); changed(true); }));
+    return wrap;
+  }
+  if (kind === 'people') {
+    const arr = arrP(obj, path);
+    arr.forEach((p, i) => wrap.append(personRow(p, arr, i, o)));
+    wrap.append(btn('btn sm', '+ Add person', () => { arr.push(blankPerson()); changed(true); }));
+    return wrap;
+  }
+  if (kind === 'check') {
+    const cb = h('input'); cb.type = 'checkbox'; cb.checked = !!getP(obj, path);
+    cb.onchange = () => { setP(obj, path, cb.checked); changed(); };
+    wrap.firstChild.prepend(cb);
+    return wrap;
+  }
+  const el = kind === 'select' ? h('select') : (kind === 'textarea' || kind === 'lines') ? h('textarea') : h('input');
+  if (kind === 'select') o.options.forEach(([v, t]) => { const op = h('option', '', t); op.value = v; el.append(op); });
+  if (kind === 'date') el.type = 'date';
+  if (o.ph) el.placeholder = o.ph;
+  if (o.list) el.setAttribute('list', o.list);
+  const v = getP(obj, path);
+  el.value = kind === 'lines' ? (v || []).join('\n') : (v ?? (kind === 'select' ? o.options[0][0] : ''));
+  el.oninput = () => { setP(obj, path, kind === 'lines' ? el.value.split('\n').map(s => s.trim()).filter(Boolean) : el.value); changed(); };
+  wrap.append(el);
+  return wrap;
+}
+
+function personRow(p, arr, i, o) {
+  const row = h('div', 'prow'), ph = h('label', 'ph'), img = h('img'), fi = h('input'), box = h('div', 'in');
+  ph.title = 'Click to choose a photo'; img.alt = '';
+  fi.type = 'file'; fi.accept = 'image/*'; fi.hidden = true;
+  ph.append(img, fi);
+  const paint = () => {
+    ph.dataset.i = initial(p.name);
+    if (p.photo) { img.src = p.photo; ph.classList.add('has'); } else { img.removeAttribute('src'); ph.classList.remove('has'); }
+  };
+  fi.onchange = async () => {
+    const f = fi.files[0]; if (!f) return;
+    try { p.photo = await squarePhoto(f); } catch { alert('Could not read this image'); return; }
+    paint(); remember(p); changed();
+  };
+  const inp = (key, ph_) => { const e = h('input'); e.placeholder = ph_; e.value = p[key] || ''; e.oninput = () => { p[key] = e.value; if (key === 'name') ph.dataset.i = initial(p.name); changed(); }; e.onchange = () => remember(p); return e; };
+  const name = inp('name', 'Full name, e.g. Dr. Nguyễn Văn A'), role = inp('role', 'Role, e.g. Undergraduate, D22');
+  name.setAttribute('list', 'names');
+  name.onchange = () => { // fill in from the library
+    const m = libGet(p.name.trim());
+    if (m) {
+      if (!p.role && m.role) role.value = p.role = m.role;
+      if (!p.photo && m.photo) p.photo = m.photo;
+      if (o.interest && !p.interest && m.interest) { p.interest = m.interest; if (interest) interest.value = m.interest; }
+      paint(); changed();
+    }
+    remember(p);
+  };
+  const interest = o.interest ? inp('interest', 'Research interest') : null;
+  box.append(name, role, ...(interest ? [interest] : []));
+  const acts = h('div', 'acts');
+  acts.append(btn('ib', '↑', () => move(arr, i, -1), 'Move up'), btn('ib', '↓', () => move(arr, i, 1), 'Move down'), btn('ib', '×', () => { arr.splice(i, 1); changed(true); }, 'Remove person'));
+  row.append(ph, box, acts);
+  paint();
+  return row;
+}
+
+// ---------- post list / library ----------
+const postLabel = (p, i) => {
+  const t = p.papers?.[0]?.title || p.title || p.headline || p.award || '';
+  const v = p.type === 'paper' && p.venue?.short ? `${p.venue.short} ${p.venue.year || ''} · ` : '';
+  return `${i + 1}. ${TYPES[p.type]}: ${v}${t.replace(/\*/g, '').slice(0, 50) || '(untitled)'}`;
+};
+function refreshPostSel() {
+  $('postSel').replaceChildren(...S.posts.map((p, i) => { const o = h('option', '', postLabel(p, i)); o.value = i; return o; }));
+  $('postSel').value = S.cur;
+}
+function refreshLib() {
+  const names = [...new Set([...Object.keys(PRESET.members), ...Object.keys(S.library)])].sort((a, b) => a.localeCompare(b, 'vi'));
+  $('names').replaceChildren(...names.map(n => { const o = h('option'); o.value = n; return o; }));
+  $('libSum').textContent = `Member library (${names.length})`;
+  $('lib').replaceChildren(...(names.length ? names.map(n => {
+    const m = libGet(n), row = h('div', 'prow'), ph = h('div', 'ph'), img = h('img'), box = h('div', 'in');
+    ph.dataset.i = initial(n);
+    if (m.photo) { img.src = m.photo; ph.classList.add('has'); }
+    ph.append(img);
+    box.append(h('b', '', n), h('span', 'hint', m.role || ''));
+    row.append(ph, box, S.library[n]
+      ? btn('ib', '×', () => { delete S.library[n]; refreshLib(); save(); }, 'Remove from library')
+      : h('span', 'hint', 'preset'));
+    return row;
+  }) : [h('p', 'hint', 'Empty. People you type in are saved here automatically.')]));
+}
+
+$('postSel').onchange = e => { S.cur = +e.target.value; buildForm(); schedulePreview(); save(); };
+$('newType').append(...Object.entries(TYPES).map(([k, v]) => { const o = h('option', '', v); o.value = k; return o; }));
+$('add').onclick = () => { S.posts.push(newPost($('newType').value)); S.cur = S.posts.length - 1; changed(true); };
+$('dup').onclick = () => { if (!P()) return; S.posts.splice(S.cur + 1, 0, structuredClone(P())); S.cur++; changed(true); };
+$('del').onclick = () => {
+  if (!P() || !confirm('Delete the post being edited?')) return;
+  S.posts.splice(S.cur, 1);
+  if (!S.posts.length) S.posts.push(newPost('paper'));
+  S.cur = Math.min(S.cur, S.posts.length - 1); changed(true);
+};
+
+// ---------- preview ----------
+let slides = [], pvT;
+const schedulePreview = () => { clearTimeout(pvT); pvT = setTimeout(preview, 150); };
+function preview() {
+  const post = P(), out = post ? renderPost(post, S.ratio) : [];
+  const avail = Math.max(280, $('slides').clientWidth || 480);
+  slides = [];
+  $('slides').replaceChildren(...out.map((s, i) => {
+    const scale = Math.min(avail, s.W > s.H ? 820 : 540) / s.W;
+    const item = h('div', 'slide'), frame = h('div', 'frame'), cv = h('div', s.cls), cap = h('div', 'cap');
+    frame.style.cssText = `width:${s.W * scale}px;height:${s.H * scale}px`;
+    cv.style.cssText = `--w:${s.W}px;--h:${s.H}px;transform:scale(${scale})`;
+    cv.innerHTML = s.html;
+    frame.append(cv);
+    cap.append(h('span', '', `${out.length > 1 ? `Slide ${i + 1}/${out.length} · ` : ''}${s.W * PIXEL_RATIO}×${s.H * PIXEL_RATIO}`), btn('btn sm', 'Export this slide', () => exportOne(cv, s)));
+    item.append(frame, cap);
+    slides.push({ cv, s });
+    return item;
+  }));
+  document.fonts.ready.then(() => slides.forEach(x => fit(x.cv)));
+  $('exp').textContent = out.length > 1 ? `Export PNG (${out.length} slides)` : 'Export PNG';
+}
+function renderRatios() {
+  $('ratios').replaceChildren(...Object.keys(RATIOS).map(k => {
+    const [W, H] = RATIOS[k], b = btn(k === S.ratio ? 'on' : '', '', () => { S.ratio = k; renderRatios(); schedulePreview(); save(); });
+    b.append(h('b', '', k), h('small', '', `${W * PIXEL_RATIO}×${H * PIXEL_RATIO}`));
+    return b;
+  }));
+  $('ratioHint').textContent = RATIO_INFO[S.ratio];
+}
+addEventListener('resize', schedulePreview);
+
+// ---------- export ----------
+let fontCSS;
+async function exportOne(cv, s) {
+  await document.fonts.ready;
+  fontCSS ??= await htmlToImage.getFontEmbedCSS(cv);
+  const url = await htmlToImage.toPng(cv, { width: s.W, height: s.H, pixelRatio: PIXEL_RATIO, fontEmbedCSS: fontCSS, style: { transform: 'none' } });
+  const a = h('a'); a.href = url; a.download = s.name; a.click();
+}
+$('exp').onclick = async e => {
+  e.target.disabled = true;
+  try { for (const x of slides) await exportOne(x.cv, x.s); }
+  catch (err) { alert('Export failed: ' + err.message); }
+  finally { e.target.disabled = false; }
+};
+
+// ---------- file .json ----------
+$('save').onclick = () => {
+  const blob = new Blob([JSON.stringify({ app: 'daisy-post-studio', v: 1, posts: S.posts, library: S.library })], { type: 'application/json' });
+  const a = h('a'); a.href = URL.createObjectURL(blob); a.download = `daisy-studio-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$('open').onclick = () => $('openFile').click();
+$('openFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!Array.isArray(d.posts) || !d.posts.every(p => p && TPL[p.type])) throw new Error('Not a DAISY Post Studio file');
+    if (!confirm(`Open ${d.posts.length} posts from the file? Current posts will be replaced (the member library is merged).`)) return;
+    S.posts = d.posts; S.library = { ...S.library, ...(d.library && typeof d.library === 'object' ? d.library : {}) }; S.cur = 0;
+    refreshLib(); changed(true);
+  } catch (err) { alert(err.message); }
+};
+
+// ---------- init ----------
+$('brandIcon').innerHTML = daisy('#fff', 'var(--red)', 12);
+const probe = new Image(); probe.onerror = () => { window.NO_LAB_LOGO = true; $('logoWarn').hidden = false; schedulePreview(); }; probe.src = 'assets/logo/daisy.svg';
+(async () => {
+  let saved;
+  try { saved = await idb.get('state'); } catch (e) { console.warn('IndexedDB unavailable; nothing will be remembered', e); }
+  if (saved?.posts?.length) S = { ...S, ...saved };
+  else S.posts = structuredClone(PRESET.examples || []);
+  if (!S.posts.length) S.posts.push(newPost('paper'));
+  if (!RATIOS[S.ratio]) S.ratio = '4:5';
+  S.cur = Math.min(S.cur || 0, S.posts.length - 1);
+  renderRatios(); refreshPostSel(); buildForm(); refreshLib(); preview();
+})();
+</script>
+</body>
+</html>

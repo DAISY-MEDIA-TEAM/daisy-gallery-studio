@@ -1,0 +1,216 @@
+/* DAISY templates — poster CSS (what gets exported to PNG).
+   v5: header · bold pills · big headline · rounded red/ink/white cards · people with clear photos · footer.
+   No dot grid, decorative flowers, mono, 01/02 numbering, shadows or gradients.
+   Units: 1em = 10px × --z (frame ratio); inside .bd/.pside multiplied by --k (fit() shrinks it). Use em everywhere. */
+:root{--red:#D30015;--red-2:#B5000F;--ink:#1A0B0D;--ink-2:#5E5153;--paper:#F6F3EE;--white:#FFFFFF;--tone:#E9E3DB;--blush:#FBE3E0}
+
+.cv{--z:1;--k:1;position:relative;flex:none;width:var(--w);height:var(--h);font-size:calc(10px*var(--z));overflow:hidden;
+  transform-origin:0 0;background:var(--paper);color:var(--ink);font-family:'Be Vietnam Pro',system-ui,sans-serif;
+  display:flex;flex-direction:column;gap:3em;padding:5.6em 6.4em 4.4em}
+.r11{--z:.92}
+.r191{--z:.66}
+.r169{--z:.7}
+.r32{--z:.8}
+:where(.cv) :where(p,h1,h2,ul,figure){margin:0;padding:0}
+
+/* ---------- frame ---------- */
+.hd{flex:none;display:flex;align-items:center;justify-content:space-between;height:8.4em}
+.logo{height:8.4em;display:flex;align-items:center}
+.logo img{height:100%;width:auto}
+.logo img+.wm{display:none}
+.wm{display:flex;align-items:center;gap:.3em;color:var(--red);font-weight:900;font-size:5em;line-height:1}
+.wm svg{width:1.2em;height:1.2em}
+.ptit{height:8.4em;display:flex}
+.ptit:empty{display:none}
+.ptit img{height:100%;width:auto}
+.bd,.pside{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:2.6em;font-size:calc(1em*var(--k))}
+.ft{flex:none;display:flex;justify-content:space-between;gap:2em;font-size:2em;font-weight:600;color:var(--ink-2)}
+
+/* ---------- type ---------- */
+.pills{display:flex;gap:1em;flex-wrap:wrap}
+.pill{font-size:2.2em;font-weight:800;letter-spacing:.08em;text-transform:uppercase;line-height:1;padding:.62em 1.1em;border-radius:99em;background:var(--ink);color:#fff}
+.pill.red{background:var(--red)}
+.h1{font-size:6.4em;font-weight:800;line-height:1.06;letter-spacing:-.03em;text-wrap:balance}
+.h1.big{font-size:11em;line-height:.92;letter-spacing:-.045em}
+.h1.xl{font-size:12em;line-height:.92;letter-spacing:-.045em}
+.redtext{color:var(--red)}
+.sub{font-size:2.6em;line-height:1.42;color:var(--ink-2);margin-top:-.4em;max-width:34em}
+.sub.strong{color:var(--ink);font-weight:700;font-size:3em}
+.lead{font-size:3.2em;font-weight:800;line-height:1.12;letter-spacing:-.02em}
+.stmt{font-size:4.2em;font-weight:700;line-height:1.18;letter-spacing:-.016em}
+.small{font-size:2.2em;line-height:1.4}
+.big{font-size:5em;font-weight:800;line-height:1.05;letter-spacing:-.03em;overflow-wrap:anywhere}
+
+/* ---------- cards ---------- */
+.main{display:flex;gap:2.4em;min-height:0}
+.card{position:relative;min-width:0;min-height:0;overflow:hidden;border-radius:2.8em;padding:3.6em;display:flex;flex-direction:column}
+.card.red{background:var(--red);color:#fff}
+.card.ink{background:var(--ink);color:#fff}
+.card.white{background:var(--white)}
+.card>:not(.gw){position:relative;z-index:1}
+.card.end>:nth-child(1 of :not(.gw)){margin-top:auto}
+.red .small,.ink .small{opacity:.85}
+
+/* research glyph: tone-on-tone in a card corner, cropped by the edge, behind the text */
+.gw{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.glyph{position:absolute;right:-4em;top:-4em;width:28em;height:28em;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.glyph .f{fill:currentColor;stroke:none}
+.glyph .t{opacity:.55}
+.red .glyph{color:var(--red-2)}
+.ink .glyph{color:rgba(255,255,255,.1)}
+
+/* ---------- people ---------- */
+.av{position:relative;flex:none;width:var(--s,9em);height:var(--s,9em);border-radius:2em;overflow:hidden;background:var(--tone);display:grid;place-items:center}
+.cv .av>span{font-size:calc(var(--s,9em)*.36);font-weight:800;color:var(--ink);opacity:.45;line-height:1}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
+.ink .av{background:#33252A}
+.cv .ink .av>span{color:#fff;opacity:.7}
+.person{display:flex;flex-direction:column;gap:1.4em;min-width:0}
+.person b{display:block;font-size:3.2em;font-weight:800;line-height:1.1;letter-spacing:-.015em}
+.person span{display:block;font-size:2.1em;line-height:1.35;margin-top:.35em;opacity:.78}
+
+/* dark people card beside the main card (1–2 people) */
+.crew{gap:2.6em}
+.crew>:first-child{margin-top:auto}
+.crew[data-n="1"]{flex:0 0 42%}
+.crew[data-n="1"] .av{--s:30em;width:100%}
+.crew[data-n="1"] b{font-size:4.2em}
+.crew[data-n="1"] span{font-size:2.3em}
+.crew[data-n="2"]{flex:0 0 46%}
+.crew[data-n="2"]>:last-child{margin-bottom:auto}
+.crew[data-n="2"] .person{flex-direction:row;align-items:center;gap:2em}
+.crew[data-n="2"] .av{--s:15em}
+.crew[data-n="2"] b{font-size:3em}
+
+/* row / grid of white person cards */
+.ppl{--ph:26em;display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:2.4em;flex:none}
+.ppl[data-n="4"]{--ph:20em}
+.ppl[data-n="5"],.ppl[data-n="6"],.ppl[data-n="7"],.ppl[data-n="8"]{--ph:15em}
+.pcard{padding:0}
+.pcard .person{gap:0}
+.pcard .av{--s:var(--ph);width:100%;height:var(--ph);border-radius:0}
+.pcard figcaption{padding:2em 2.4em 2.4em}
+.pcard b{font-size:3em}
+.pcard span{font-size:2em;color:var(--ink-2);opacity:1}
+
+/* ---------- paper ---------- */
+.paper-solo .main{flex:1}
+.venue{flex:1;container-type:inline-size}
+.paper-solo .h1{font-size:5.6em}
+.vname{font-weight:800;line-height:.88;letter-spacing:-.045em;margin-left:-.04em;font-size:min(19em, calc(var(--k) * 100cqw / (var(--len) * .64)))}
+.vname span{color:var(--ink)}
+.vfull{font-size:2.4em;line-height:1.38;margin-top:1.1em;opacity:.92;max-width:26em}
+.plist{flex:1;min-height:0;display:flex;flex-direction:column;gap:2em}
+.pitem{flex:1;padding:3em 3.4em}
+.ptitle{font-size:3em;font-weight:800;line-height:1.18;letter-spacing:-.015em}
+.chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.6em;align-items:start;margin-top:auto;padding-top:1.8em}
+.chip{display:flex;flex-direction:column;align-items:flex-start;gap:.9em;min-width:0}
+.chip .av{--s:12em;width:min(var(--s),100%);height:auto;aspect-ratio:1;border-radius:1.6em}
+.chip b{display:block;font-size:2.6em;font-weight:800;line-height:1.12;letter-spacing:-.015em}
+.chip i{display:block;font-style:normal;font-size:1.9em;color:var(--red);font-weight:800;margin-top:.2em}
+.pvenue{font-size:2.2em;font-weight:800;color:var(--red);margin-top:.5em}
+.paper-multi .h1.big{font-size:8em}
+.paper-multi .sub{font-size:2.3em}
+/* 3–4 papers: 2×2 cards (the third of three spans the bottom row) */
+.plist[data-n="3"],.plist[data-n="4"]{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr)}
+.plist[data-n="3"] .pitem:last-child{grid-column:1/-1}
+.plist[data-n="3"] .pitem,.plist[data-n="4"] .pitem{padding:2.6em}
+.plist[data-n="3"] .ptitle,.plist[data-n="4"] .ptitle{font-size:2.5em}
+.plist[data-n="3"] .chip .av,.plist[data-n="4"] .chip .av{--s:9.5em}
+.plist[data-n="3"] .pitem:last-child .chip .av{--s:11em}
+.plist[data-n="3"] .chips,.plist[data-n="4"] .chips{grid-template-columns:repeat(var(--c),minmax(0,1fr))}
+.plist[data-n="3"] .pitem:last-child .chips{grid-template-columns:repeat(4,minmax(0,1fr))}
+.plist[data-n="3"] .chip b,.plist[data-n="4"] .chip b{font-size:2.2em}
+.plist[data-n="3"] .chip i,.plist[data-n="4"] .chip i{font-size:1.7em}
+/* landscape: people in two columns so photos stay large */
+.land .pside .chips{grid-template-columns:repeat(var(--c2),minmax(0,1fr));gap:1.2em 1.6em}
+.land .pside .chip{flex-direction:row;align-items:center;gap:1.2em}
+.land .pside .chip .av{--s:9.5em;width:var(--s);flex:none}
+.land .pside .chip b{font-size:2.6em}
+.land .pside .chip i{font-size:2.1em}
+
+/* ---------- welcome ---------- */
+.welcome .ppl{flex:1;align-content:start;--ph:28em}
+.welcome .ppl[data-n="1"]{--ph:46em}
+.welcome .ppl[data-n="2"]{--ph:38em}
+.welcome .ppl[data-n="3"]{--ph:28em}
+.welcome .ppl[data-n="5"],.welcome .ppl[data-n="6"]{--ph:22em}
+.welcome .pcard b{font-size:3.4em}
+
+/* ---------- event ---------- */
+.event .when{flex:1}
+.date{flex:0 0 40%}
+.mon{font-size:4.4em;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1}
+.day{font-size:17em;font-weight:800;line-height:.86;letter-spacing:-.05em;margin:.04em 0 .1em -.04em}
+.info{flex:1;justify-content:space-between;gap:2em}
+.info .lead{font-size:5em}
+.info .small{font-size:2.8em;opacity:.9}
+.speaker{flex:none;padding:2.8em;gap:2.4em}
+.speaker .person{flex-direction:row;align-items:center;gap:3em}
+.speaker .av{--s:24em}
+.speaker b{font-size:4.6em}
+.speaker span{font-size:2.6em;color:var(--ink-2);opacity:1}
+.speaker[data-n="2"]{flex-direction:row}
+.speaker[data-n="2"] .person{flex:1}
+.speaker[data-n="2"] .av{--s:15em}
+.speaker[data-n="2"] b{font-size:3.2em}
+
+/* ---------- recruit ---------- */
+.lists{flex:1}
+.lists .card{flex:1;gap:1.8em}
+.lists .lead{font-size:3em}
+.tags{display:flex;flex-wrap:wrap;gap:1em}
+.tags span{font-size:2.2em;font-weight:700;padding:.5em .95em;border-radius:99em;background:var(--blush);color:#A30010}
+.lists ul{list-style:none;display:flex;flex-direction:column;gap:.9em}
+.lists li{font-size:2.4em;line-height:1.4}
+.cta{flex:none;flex-direction:row;align-items:flex-end;justify-content:space-between;gap:3em;padding:3.6em 4em}
+.cta .dl{text-align:right;flex:none}
+
+/* ---------- award ---------- */
+.award .main{flex:1}
+.proj{flex:1}
+.proj .stmt{max-width:20em}
+
+/* ---------- landscape: left column = text, right column = people / list ---------- */
+.land{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:2.4em 4.4em;padding:4.4em 5em 3.4em}
+.land .hd{grid-column:1;height:7em}
+.land .logo,.land .ptit{height:7em}
+.land .bd{grid-column:1;grid-row:2;gap:2.2em}
+.land .ft{grid-column:1;grid-row:3}
+.land .pside{grid-column:2;grid-row:1/4}
+.land.paper-multi{grid-template-columns:minmax(0,.8fr) minmax(0,1.7fr)}
+.mark .day{font-size:16em;font-weight:800;line-height:.86;letter-spacing:-.05em}
+.land:not(.has-side) .bd{grid-column:1/3}
+.land .h1{font-size:5.2em}
+.land .h1.big{font-size:8.4em}
+.land .h1.xl{font-size:9.6em}
+.land .stmt{font-size:3.4em}
+.land .main,.land .lists,.land .when,.land .venue,.land .mark,.land .proj{flex:1}
+.land .crew{flex:1}
+.land .crew>:last-child{margin-bottom:auto}
+.land .crew .person{flex-direction:row;align-items:center;gap:2em}
+.land .crew .av{--s:20em;width:var(--s)}
+.land .crew b{font-size:3.6em}
+.land .crew span{font-size:2.4em}
+.land .crew[data-n="1"] .person{flex-direction:column;align-items:stretch}
+.land .crew[data-n="1"] .av{--s:30em;width:100%;height:auto;aspect-ratio:1}
+.land .crew[data-n="1"] b{font-size:4.4em}
+.land .crew[data-n="3"] .av{--s:16em}
+.land .crew[data-n="4"] .av,.land .crew[data-n="5"] .av{--s:12em}
+.land .crew[data-n="6"],.land .crew[data-n="7"],.land .crew[data-n="8"]{display:grid;grid-template-columns:1fr 1fr;align-content:center}
+.land .crew[data-n="6"] .av,.land .crew[data-n="7"] .av,.land .crew[data-n="8"] .av{--s:9em}
+.land .pside .plist{gap:1.6em}
+.land .pside .pitem{padding:2.4em 2.8em}
+.land .pside .ppl{flex:1;--ph:18em}
+.land .pside .ppl[data-n="1"]{--ph:40em}
+.land .pside .ppl[data-n="2"]{--ph:30em}
+.land .pside .speaker{flex:1}
+.land .pside .speaker .person{flex-direction:column;align-items:stretch;gap:2em}
+.land .pside .speaker .av{--s:30em;width:100%;height:auto;aspect-ratio:1}
+.land .pside .speaker b{font-size:5em}
+.land .pside .lists{flex-direction:column;justify-content:center}
+.land .pside .lists .card{flex:none}
+
+.land.recruit .cta{flex:1;flex-direction:column;align-items:flex-start;justify-content:flex-end}
+.land.recruit .cta .dl{text-align:left}
+.land .big{font-size:4.2em;overflow-wrap:normal}
