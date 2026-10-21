@@ -71,15 +71,15 @@
 
 /* dark people card beside the main card (1–2 people) */
 .crew{gap:2.6em}
-.crew>:first-child{margin-top:auto}
+/* photos take the space the card has: fewer people → bigger photos (no fixed sizes, so fit() stays honest) */
+.crew .person{flex:1 1 0;min-height:0}
 .crew[data-n="1"]{flex:0 0 42%}
-.crew[data-n="1"] .av{--s:30em;width:100%}
+.crew[data-n="1"] .av{flex:1 1 0;min-height:0;width:100%;height:auto}
 .crew[data-n="1"] b{font-size:4.2em}
 .crew[data-n="1"] span{font-size:2.3em}
 .crew[data-n="2"]{flex:0 0 46%}
-.crew[data-n="2"]>:last-child{margin-bottom:auto}
-.crew[data-n="2"] .person{flex-direction:row;align-items:center;gap:2em}
-.crew[data-n="2"] .av{--s:15em}
+.crew:not([data-n="1"]) .person{flex-direction:row;align-items:center;gap:2em;container-type:inline-size}
+.crew:not([data-n="1"]) .av{height:100%;width:auto;aspect-ratio:1;max-width:48%;max-height:48cqw}
 .crew[data-n="2"] b{font-size:3em}
 
 /* row / grid of white person cards */
@@ -103,9 +103,10 @@
 .plist{flex:1;min-height:0;display:flex;flex-direction:column;gap:2em}
 .pitem{flex:1;padding:3em 3.4em}
 .ptitle{font-size:3em;font-weight:800;line-height:1.18;letter-spacing:-.015em}
-.chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.6em;align-items:start;margin-top:auto;padding-top:1.8em}
-.chip{display:flex;flex-direction:column;align-items:flex-start;gap:.9em;min-width:0}
-.chip .av{--s:12em;width:min(var(--s),100%);height:auto;aspect-ratio:1;border-radius:1.6em}
+.chips{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--c),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:1.6em;padding-top:1.8em}
+.chip{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:.9em;min-width:0;min-height:0;container-type:inline-size}
+/* square photo grows into the space left under the title, capped by the column width */
+.chip .av{flex:0 1 auto;min-height:5em;height:100%;width:auto;max-width:100%;max-height:100cqw;aspect-ratio:1;border-radius:1.6em}
 .chip b{display:block;font-size:2.6em;font-weight:800;line-height:1.12;letter-spacing:-.015em}
 .chip i{display:block;font-style:normal;font-size:1.9em;color:var(--red);font-weight:800;margin-top:.2em}
 .pvenue{font-size:2.2em;font-weight:800;color:var(--red);margin-top:.5em}
@@ -116,16 +117,12 @@
 .plist[data-n="3"] .pitem:last-child{grid-column:1/-1}
 .plist[data-n="3"] .pitem,.plist[data-n="4"] .pitem{padding:2.6em}
 .plist[data-n="3"] .ptitle,.plist[data-n="4"] .ptitle{font-size:2.5em}
-.plist[data-n="3"] .chip .av,.plist[data-n="4"] .chip .av{--s:9.5em}
-.plist[data-n="3"] .pitem:last-child .chip .av{--s:11em}
-.plist[data-n="3"] .chips,.plist[data-n="4"] .chips{grid-template-columns:repeat(var(--c),minmax(0,1fr))}
-.plist[data-n="3"] .pitem:last-child .chips{grid-template-columns:repeat(4,minmax(0,1fr))}
 .plist[data-n="3"] .chip b,.plist[data-n="4"] .chip b{font-size:2.2em}
 .plist[data-n="3"] .chip i,.plist[data-n="4"] .chip i{font-size:1.7em}
 /* landscape: people in two columns so photos stay large */
 .land .pside .chips{grid-template-columns:repeat(var(--c2),minmax(0,1fr));gap:1.2em 1.6em}
-.land .pside .chip{flex-direction:row;align-items:center;gap:1.2em}
-.land .pside .chip .av{--s:9.5em;width:var(--s);flex:none}
+.land .pside .chip{flex-direction:row;align-items:center;justify-content:flex-start;gap:1.6em}
+.land .pside .chip .av{flex:none;height:100%;max-width:45%;max-height:45cqw}
 .land .pside .chip b{font-size:2.6em}
 .land .pside .chip i{font-size:2.1em}
 
@@ -171,20 +168,31 @@
 .proj{flex:1}
 .proj .stmt{max-width:20em}
 
-/* ---------- photo frame: photos only, same radius and gap as the cards ---------- */
-.shots{flex:1;min-height:0;display:grid;gap:2.4em;grid-template-columns:minmax(0,1fr)}
-.shots:empty{background:var(--tone);border-radius:2.8em}
+/* ---------- photo frame: photos with a thin paper border, one bar with a concave top edge ---------- */
+.cv.photo,.land.photo{display:flex;flex-direction:column;gap:0;padding:1.4em 1.4em 0}
+.bleed{flex:1;min-height:0;display:flex}
+.shots{flex:1;min-height:0;display:grid;gap:1.4em;grid-template-columns:minmax(0,1fr)}
+.shots:empty{background:var(--tone);border-radius:1.2em}
 /* --px/--py: focal point, --pz: zoom (set per photo in the editor) */
-.shot{min-height:0;overflow:hidden;border-radius:2.8em}
+.shot{min-height:0;overflow:hidden;border-radius:1.2em}
 .shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--px) var(--py);transform:scale(var(--pz));transform-origin:var(--px) var(--py)}
 .shots[data-n="2"]{grid-template-rows:1fr 1fr}
 .shots[data-n="3"]{grid-template-columns:1fr 1fr;grid-template-rows:1.4fr 1fr}
 .shots[data-n="3"] .shot:first-child{grid-column:1/-1}
 .shots[data-n="4"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
-.land.photo .hd,.land.photo .ft{grid-column:1/3}
 .land .shots[data-n="2"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr}
 .land .shots[data-n="3"]{grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr}
 .land .shots[data-n="3"] .shot:first-child{grid-column:1;grid-row:1/3}
+.bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;gap:3em;margin:0 -1.4em;padding:1.4em 5em 3.6em;background:var(--paper)}
+.bar .curve{position:absolute;left:0;bottom:calc(100% - 1px);width:100%;height:6em;fill:var(--paper)}
+.logos{display:flex;align-items:center;gap:2.4em}
+.bar .logo,.bar .ptit{height:7.4em}
+.who{display:flex;flex-direction:column;align-items:flex-end;text-align:right;gap:.3em}
+.who b{font-size:2.8em;font-weight:800;letter-spacing:-.015em;line-height:1.15}
+.who span{font-size:2.2em;font-weight:600;color:var(--ink-2)}
+.land .bar{padding:1em 4.4em 2.8em}
+.land .bar .curve{height:4.5em}
+.land .bar .logo,.land .bar .ptit{height:6.4em}
 
 /* ---------- landscape: left column = text, right column = people / list ---------- */
 .land{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:2.4em 4.4em;padding:4.4em 5em 3.4em}
@@ -202,18 +210,10 @@
 .land .stmt{font-size:3.4em}
 .land .main,.land .lists,.land .when,.land .venue,.land .mark,.land .proj{flex:1}
 .land .crew{flex:1}
-.land .crew>:last-child{margin-bottom:auto}
-.land .crew .person{flex-direction:row;align-items:center;gap:2em}
-.land .crew .av{--s:20em;width:var(--s)}
 .land .crew b{font-size:3.6em}
 .land .crew span{font-size:2.4em}
-.land .crew[data-n="1"] .person{flex-direction:column;align-items:stretch}
-.land .crew[data-n="1"] .av{--s:30em;width:100%;height:auto;aspect-ratio:1}
 .land .crew[data-n="1"] b{font-size:4.4em}
-.land .crew[data-n="3"] .av{--s:16em}
-.land .crew[data-n="4"] .av,.land .crew[data-n="5"] .av{--s:12em}
-.land .crew[data-n="6"],.land .crew[data-n="7"],.land .crew[data-n="8"]{display:grid;grid-template-columns:1fr 1fr;align-content:center}
-.land .crew[data-n="6"] .av,.land .crew[data-n="7"] .av,.land .crew[data-n="8"] .av{--s:9em}
+.land .crew[data-n="6"],.land .crew[data-n="7"],.land .crew[data-n="8"]{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr)}
 .land .pside .plist{gap:1.6em}
 .land .pside .pitem{padding:2.4em 2.8em}
 .land .pside .ppl{flex:1;--ph:18em}

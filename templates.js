@@ -106,6 +106,9 @@ const placePeople = (list, ctx, sub) => ctx.land ? { beside: '', below: '', side
   : list.length <= 2 ? { beside: crewCard(list, sub), below: '', side: '' }
   : { beside: '', below: pplRow(list, sub), side: '' };
 
+// portrait: --c columns; landscape: --c2 columns
+const chipVars = n => `--c:${Math.min(n, 4) || 1};--c2:${Math.min(n, 2) || 1}`;
+
 // ---------- templates ----------
 const TPL = {
   paper(p, ctx) {
@@ -128,7 +131,7 @@ const TPL = {
         <div class="card white pitem">
           <p class="ptitle">${rich(pp.title)}</p>
           ${pp.venue ? `<p class="pvenue">${esc(pp.venue)}</p>` : ''}
-          <div class="chips" style="--c:${Math.min(crewList(pp.authors, pp.advisors).length, 4) || 1};--c2:${Math.min(crewList(pp.authors, pp.advisors).length, 2) || 1}">${crewList(pp.authors, pp.advisors).map(x =>
+          <div class="chips" style="${chipVars(crewList(pp.authors, pp.advisors).length)}">${crewList(pp.authors, pp.advisors).map(x =>
             `<span class="chip">${av(x.p)}<span><b>${esc(x.p.name)}</b>${x.adv ? `<i>${T.advisor}</i>` : ''}</span></span>`).join('')}</div>
         </div>`).join('')}</div>`;
       return { v: 'paper-multi', side: ctx.land ? cards : '', html: `
@@ -198,16 +201,25 @@ const TPL = {
   // each photo: { src, x, y (focal %), z (zoom) }; old posts store bare dataURL strings
   photo(p) {
     const list = (p.photos || []).map((s, i) => ({ ...(typeof s === 'string' ? { src: s } : s), i }));
-    return chunk(list, 4).map(ch => ({ v: 'photo', side: '',
+    return chunk(list, 4).map(ch => ({ v: 'photo', side: '', bleed: true,
       html: `<div class="shots" data-n="${ch.length}">${ch.map(s => `<div class="shot" data-i="${s.i}" style="--px:${+(s.x ?? 50)}%;--py:${+(s.y ?? 40)}%;--pz:${+s.z || 1}"><img src="${esc(s.src)}" alt=""></div>`).join('')}</div>` }));
   },
 };
 
 // ---------- frame ----------
-const shell = (pg, ctx, pageLabel) => `
-  <header class="hd">
+const logos = () => `
     <div class="logo">${window.NO_LAB_LOGO ? '' : '<img src="assets/logo/daisy.svg" alt="DAISY" onerror="this.remove()">'}<span class="wm">${daisy('var(--red)', '#fff', 12)}DAISY</span></div>
-    <div class="ptit"><img src="assets/logo/ptit.png" alt="PTIT" onerror="this.remove()"></div>
+    <div class="ptit"><img src="assets/logo/ptit.png" alt="PTIT" onerror="this.remove()"></div>`;
+// photo frame: photos with a thin border, then one bar with a concave top edge (logos left, lab + url right)
+const bleedShell = (pg, pageLabel) => `
+  <div class="bleed">${pg.html}</div>
+  <footer class="bar">
+    <svg class="curve" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0C30 9 70 9 100 0V10H0Z"/></svg>
+    <div class="logos">${logos()}</div>
+    <div class="who"><b>${T.lab}</b><span>datalab.ptit.edu.vn${pageLabel ? ` · ${pageLabel}` : ''}</span></div>
+  </footer>`;
+const shell = (pg, ctx, pageLabel) => pg.bleed ? bleedShell(pg, pageLabel) : `
+  <header class="hd">${logos()}
   </header>
   <main class="bd">${pg.html}</main>
   ${ctx.land && pg.side ? `<aside class="pside">${pg.side}</aside>` : ''}
