@@ -246,3 +246,78 @@ function renderPost(post, key) {
     name: `${base}${pages.length > 1 ? `-${pi + 1}` : ''}_${key.replace(':', 'x')}.png`,
   }));
 }
+
+// ---------- Facebook caption: Vietnamese block, English block, hashtags ----------
+// ponytail: fixed bilingual sentences filled from the form; change the lab's voice by editing them here
+const nm = (arr = []) => arr.map(who).map(p => p.name).filter(Boolean).join(', ');
+const plain = s => String(s ?? '').replace(/\*(.+?)\*/g, '$1').trim();
+// paragraphs: each arg is a line or a list of lines; empty lines and empty paragraphs drop out
+const para = (...gs) => gs.map(g => [].concat(g).filter(Boolean).join('\n')).filter(Boolean).join('\n\n');
+const bullets = (head, xs = []) => xs.length ? [head, ...xs.map(x => `• ${x}`)] : [];
+const day = (s, loc, wk) => s ? new Date(s + 'T00:00').toLocaleDateString(loc, loc === 'vi-VN'
+  ? { ...(wk && { weekday: 'long' }), day: '2-digit', month: '2-digit', year: 'numeric' }
+  : { ...(wk && { weekday: 'long' }), month: 'long', day: 'numeric', year: 'numeric' }) : '';
+const hashtag = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').replace(/[^A-Za-z0-9]/g, '');
+
+const CAPTION = {
+  paper(p) {
+    const v = p.venue || {}, list = p.papers || [], venue = [v.short, v.year].filter(Boolean).join(' ');
+    const at = venue ? ` tại ${venue}` : '', atEn = venue ? ` at ${venue}` : '', note = v.note ? ` (${v.note})` : '';
+    const tags = v.short ? [`#${hashtag(v.short)}${hashtag(v.year)}`] : [];
+    if (list.length === 1) {
+      const pp = list[0], a = nm(pp.authors), ad = nm(pp.advisors), t = pp.title && `📄 "${plain(pp.title)}"`;
+      return { tags,
+        vi: para(`🎉 Chúc mừng! Bài báo của DAISY Lab đã được chấp nhận${at}${note}.`, [t, a && `👥 Tác giả: ${a}`, ad && `🎓 Hướng dẫn: ${ad}`, v.full && `📍 ${v.full}`]),
+        en: para(`🎉 Congratulations! Our paper has been accepted${atEn}${note}.`, [t, a && `👥 Authors: ${a}`, ad && `🎓 Advisors: ${ad}`, v.full && `📍 ${v.full}`]) };
+    }
+    const items = list.map((pp, i) => [`${i + 1}. "${plain(pp.title)}"${pp.venue ? ` (${pp.venue})` : ''}`,
+      `    👥 ${join(nm(pp.authors), nm(pp.advisors) && `🎓 ${nm(pp.advisors)}`)}`]).flat();
+    return { tags,
+      vi: para(`🎉 Chúc mừng! DAISY Lab có ${list.length} bài báo được chấp nhận${at}${note}.`, v.full && `📍 ${v.full}`, items),
+      en: para(`🎉 Congratulations! ${list.length} DAISY Lab papers have been accepted${atEn}${note}.`, v.full && `📍 ${v.full}`, items) };
+  },
+
+  welcome(p) {
+    const all = (p.members || []).map(who), n = all.length, term = p.term ? ` (${p.term})` : '';
+    const list = all.map(m => `• ${join(m.name, m.role, m.interest)}`);
+    return {
+      vi: para(`👋 Chào mừng ${n > 1 ? `${n} thành viên mới` : 'thành viên mới'} gia nhập DAISY Lab${term}!`, list, 'Chúc các bạn có một hành trình nghiên cứu thật nhiều niềm vui và thành công!'),
+      en: para(`👋 ${plain(p.title) || T.welcome(n)}${term}!`, plain(p.subtitle), list) };
+  },
+
+  event(p) {
+    const sp = nm(p.speakers), many = (p.speakers || []).length > 1, head = `📢 ${[p.tag || T.seminar, plain(p.title)].filter(Boolean).join(': ')}`;
+    return {
+      vi: para(head, [sp && `🎤 Diễn giả: ${sp}`, p.date && `🗓 ${join(day(p.date, 'vi-VN', 1), p.time)}`, p.place && `📍 ${p.place}`, p.format && `💻 Hình thức: ${p.format}`], 'Mời các bạn quan tâm đến tham dự!'),
+      en: para(head, plain(p.desc), [sp && `🎤 ${many ? 'Speakers' : 'Speaker'}: ${sp}`, p.date && `🗓 ${join(day(p.date, T.locale, 1), p.time)}`, p.place && `📍 ${p.place}`, p.format && `💻 Format: ${p.format}`], 'Everyone interested is welcome to join!') };
+  },
+
+  recruit(p) {
+    const term = p.term ? ` ${p.term}` : '';
+    return {
+      vi: para(`🔎 DAISY Lab tuyển thành viên${term}!`, bullets('Hướng nghiên cứu:', p.areas), bullets('Yêu cầu:', p.requirements),
+        [p.contact && `📝 Đăng ký: ${p.contact}`, p.deadline && `⏰ Hạn đăng ký: ${p.deadline}`]),
+      en: para(`🔎 ${plain(p.headline) || T.recruiting}${p.term ? ` – ${p.term}` : ''}`, plain(p.intro), bullets(`${T.areas}:`, p.areas), bullets(`${T.req}:`, p.requirements),
+        [p.contact && `📝 ${T.apply}: ${p.contact}`, p.deadline && `⏰ ${T.deadline}: ${p.deadline}`]) };
+  },
+
+  award(p) {
+    const m = nm(p.members), ad = nm(p.advisors), proj = p.project && `💡 "${plain(p.project)}"`;
+    return {
+      vi: para(`🏆 Chúc mừng nhóm DAISY Lab đã đạt ${plain(p.award) || 'giải thưởng'}${p.event ? ` tại ${plain(p.event)}` : ''}!`, [proj, m && `👥 Thành viên: ${m}`, ad && `🎓 Hướng dẫn: ${ad}`]),
+      en: para(`🏆 Congratulations to our team on winning ${plain(p.award) || 'an award'}${p.event ? ` at ${plain(p.event)}` : ''}!`, [proj, m && `👥 Team: ${m}`, ad && `🎓 Advisors: ${ad}`]) };
+  },
+
+  photo(p) {
+    const where = (at, d) => `${p.what ? ` ${at} ${p.what}` : ''}${p.place ? ` – ${p.place}` : ''}${d ? `, ${d}` : ''}`;
+    return {
+      vi: para(`📸 Một vài khoảnh khắc của DAISY Lab${where('tại', day(p.date, 'vi-VN'))}.`),
+      en: para(`📸 Some moments from DAISY Lab${where('at', day(p.date, T.locale))}.`) };
+  },
+};
+
+function caption(post) {
+  post = clean(post);
+  const c = CAPTION[post.type]?.(post);
+  return c ? para(c.vi, '—', c.en, ['#DAISYLab', '#PTIT', ...(c.tags || [])].join(' ')) : '';
+}

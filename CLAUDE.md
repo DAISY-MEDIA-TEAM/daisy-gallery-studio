@@ -1,6 +1,6 @@
 # DAISY Post Studio
 
-A static web app that makes social-media posters for **DAISY Lab** (Data and Intelligent Systems Lab, PTIT, https://datalab.ptit.edu.vn): accepted papers, new members, seminars/events, recruitment and awards. People fill in a form, upload photos, see a live preview and export PNGs sized for Facebook. No backend. Everything (UI and posters) is in English.
+A static web app that makes social-media posters for **DAISY Lab** (Data and Intelligent Systems Lab, PTIT, https://datalab.ptit.edu.vn): accepted papers, new members, seminars/events, recruitment and awards. People fill in a form, upload photos, see a live preview and export PNGs sized for Facebook. No backend. Everything (UI and posters) is in English, except the **Facebook caption** under the preview: Vietnamese block, `—`, English block, hashtags (`CAPTION.<type>` / `caption()` in `templates.js`; a hand edit is stored in `post.caption`, ↺ drops it).
 
 ## Run / deploy
 - Locally: `python3 -m http.server 8000` → http://localhost:8000. Do not open via `file://`: html-to-image must be able to fetch images and fonts.
@@ -37,7 +37,7 @@ A static web app that makes social-media posters for **DAISY Lab** (Data and Int
 | `event` | `tag`, `format?`, `title`, `desc?`, `speakers[]`, `date: YYYY-MM-DD`, `time`, `place` |
 | `recruit` | `headline`, `term?`, `intro?`, `areas[]`, `requirements[]`, `contact`, `deadline` |
 | `award` | `award`, `event?`, `project?`, `members[]`, `advisors[]` |
-| `photo` | `photos[]: { src, x?, y?, z? }` (src = JPEG dataURL, long edge ≤ 2000px; x/y focal % default 50/40, z zoom 1–4; legacy bare strings accepted, upgraded by `shotAt()`). Drag on the preview moves, wheel / form slider zooms. Photo frame: header logos + photos + footer, no text; 1–4 per image (1 full · 2 stacked · 3 = 1 big + 2 · 4 = 2×2), more → album via `chunk()` |
+| `photo` | `photos[]: { src, x?, y?, z? }` (src = JPEG dataURL, long edge ≤ 2000px; x/y focal % default 50/40, z zoom 1–4; legacy bare strings accepted, upgraded by `shotAt()`). Drag on the preview moves, wheel / form slider zooms. `what? place? date?` feed the caption only. Photo frame: header logos + photos + footer, no text; 1–4 per image (1 full · 2 stacked · 3 = 1 big + 2 · 4 = 2×2), more → album via `chunk()` |
 
 Old posts may still carry `lang` or `*word*` markup; both are ignored (asterisks are stripped).
 
@@ -64,4 +64,5 @@ Portrait, top to bottom: **header** (DAISY logo left, PTIT right) · **pills** (
 1. `templates.js`: `TPL.<type>(post, ctx)` returns `[{ v, html, side }]` (one per slide). `v` = layout class, `side` = right column in landscape (render it inline in `html` when `!ctx.land`).
 2. `templates.css`: style with em, reuse `.pills .h1 .sub .card .crew .ppl .pcard .person .av`.
 3. `index.html`: add to `TYPES`, `FORMS` (field kinds `text | textarea | select | date | check | lines | list | people | photos`) and `BLANK`.
-4. Check all 5 ratios; a slide whose `--k` hits 0.5 is overflowing.
+4. `templates.js`: add `CAPTION.<type>(post)` returning `{ vi, en, tags? }` (build with `para()`).
+5. Check all 5 ratios; a slide whose `--k` hits 0.5 is overflowing.
