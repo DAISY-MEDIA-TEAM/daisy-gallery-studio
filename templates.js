@@ -57,10 +57,13 @@ const B = (d, c = '') => `<path d="${d}" class="b ${c}"/>`;
 const D = (d, c = '') => `<path d="${d}" class="d ${c}"/>`;
 const P = (d, c = '') => `<path d="${d}"${c && ` class="${c}"`}/>`;
 return {
-  // Bloch sphere: lit sphere, shadow crescent, equator and state vector cut in the ground
-  quantum: () => C(100, 100, 80, 'h') + P('M146.9 35.2A80 80 0 1 1 35.2 146.9A80 80 0 0 0 146.9 35.2Z')
-    + `<ellipse cx="100" cy="100" rx="80" ry="22" class="d g"/>` + D('M100 100L146 50', 'g') + C(146, 50, 10, 'g') + C(100, 100, 7, 'g')
-    + D('M100 2V12') + D('M100 188V198'),
+  // quantum circuit preparing a GHZ state (the lab's own multicast state): qubit wires, Hadamard gate,
+  // two CNOTs (control dot, ⊕ target), measurement meters
+  quantum: () => B('M2 44H196M2 100H196M2 156H196', 'h')
+    + `<rect x="12" y="18" width="52" height="52" rx="12"/>` + D('M28 32V56M48 32V56M28 44H48', 'g')
+    + B('M90 44V100') + C(90, 44, 11) + C(90, 100, 22) + D('M90 82V118M72 100H108', 'g')
+    + B('M126 100V156') + C(126, 100, 11) + C(126, 156, 22) + D('M126 138V174M108 156H144', 'g')
+    + [44, 100, 156].map(y => `<rect x="152" y="${y - 20}" width="40" height="40" rx="10"/>` + D(`M160 ${y + 9}A12 12 0 0 1 184 ${y + 9}`, 'g') + D(`M172 ${y + 9}L182 ${y - 9}`, 'g')).join(''),
   // double helix: back strand half, rungs, front strand full (over/under crossings)
   bio: () => {
     const x = (y, k) => 100 + k * 50 * Math.sin(y / 28), seg = { a: [[], []], b: [[], []] };
