@@ -316,8 +316,10 @@ const CAPTION = {
   },
 };
 
+const CAPTION_FOOT = ['---', '📍 Data and Intelligent Systems Lab (DAISY) · Học viện Công nghệ Bưu chính Viễn thông (PTIT)', '🌐 datalab.ptit.edu.vn'];
+
 function caption(post) {
   post = clean(post);
   const c = CAPTION[post.type]?.(post);
-  return c ? para(c.vi, '—', c.en, ['#DAISYLab', '#PTIT', ...(c.tags || [])].join(' ')) : '';
+  return c ? para(c.vi, '—', c.en, ['#DAISYLab', '#PTIT', ...(c.tags || [])].join(' '), CAPTION_FOOT) : '';
 }
