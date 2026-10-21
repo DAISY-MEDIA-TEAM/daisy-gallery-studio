@@ -60,6 +60,11 @@ form{display:flex;flex-direction:column;gap:14px}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
 .ph.has img{display:block}
 .ph::after{content:'+';position:absolute;right:0;bottom:0;width:16px;height:16px;border-radius:50%;background:var(--ink);font-size:12px;line-height:16px;text-align:center}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.thumb{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--cream)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .acts{position:absolute;top:4px;right:4px;display:flex;gap:2px}
+.thumb .ib{width:22px;height:22px;font-size:10px}
 .lib summary{cursor:pointer;font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .lib .prow{grid-template-columns:32px 1fr auto;margin-top:8px}
 .lib .ph{width:32px;height:32px;font-size:12px;cursor:default}
@@ -127,7 +132,7 @@ const RATIO_INFO = {
   '16:9': 'Landscape · screens, slides, event covers',
   '3:2': 'Landscape · taller, fits more people',
 };
-const TYPES = { paper: 'Accepted paper', welcome: 'New members', event: 'Seminar / event', recruit: 'Recruitment', award: 'Award' };
+const TYPES = { paper: 'Accepted paper', welcome: 'New members', event: 'Seminar / event', recruit: 'Recruitment', award: 'Award', photo: 'Photos (conference, talk, activity)' };
 
 // ---------- form schema: [path, kind, label, opts] ----------
 const blankPerson = () => ({ name: '', role: '' });
@@ -172,6 +177,8 @@ const FORMS = {
     ['project', 'textarea', 'Project title'],
     ['members', 'people', 'Team members'],
     ['advisors', 'people', 'Advisors']],
+  photo: [
+    ['photos', 'photos', 'Photos (up to 4 per image; more become an album)']],
 };
 const BLANK = {
   paper: () => ({ venue: { short: '', year: String(new Date().getFullYear()), full: '', note: '' }, papers: [FORMS.paper.find(f => f[0] === 'papers')[3].blank()] }),
@@ -179,6 +186,7 @@ const BLANK = {
   event: () => ({ speakers: [blankPerson()] }),
   recruit: () => ({ headline: 'Join DAISY Lab', areas: [], requirements: [] }),
   award: () => ({ members: [blankPerson()], advisors: [] }),
+  photo: () => ({ photos: [] }),
 };
 const newPost = type => ({ type, ...BLANK[type]() });
 
@@ -211,13 +219,19 @@ const arrP = (o, p) => { let a = getP(o, p); if (!Array.isArray(a)) setP(o, p, a
 const move = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; changed(true); };
 const libGet = name => S.library[name] || PRESET.members[name];
 
-// Square crop + resize to 600px -> JPEG dataURL (~60KB)
+// Resize -> JPEG dataURL. square: crop + 600px (~60KB) for people; otherwise keep the aspect, long edge ≤ size
 // ponytail: crop sits 30% from the top because faces are in the upper half; add a drag/zoom UI if that misses
-async function squarePhoto(file, size = 600) {
-  const bmp = await createImageBitmap(file);
-  const s = Math.min(bmp.width, bmp.height), c = h('canvas');
-  c.width = c.height = Math.min(size, s);
-  c.getContext('2d').drawImage(bmp, (bmp.width - s) / 2, (bmp.height - s) * 0.3, s, s, 0, 0, c.width, c.height);
+async function loadPhoto(file, size = 600, square = true) {
+  const bmp = await createImageBitmap(file), c = h('canvas');
+  if (square) {
+    const s = Math.min(bmp.width, bmp.height);
+    c.width = c.height = Math.min(size, s);
+    c.getContext('2d').drawImage(bmp, (bmp.width - s) / 2, (bmp.height - s) * 0.3, s, s, 0, 0, c.width, c.height);
+  } else {
+    const r = Math.min(1, size / Math.max(bmp.width, bmp.height));
+    c.width = Math.round(bmp.width * r); c.height = Math.round(bmp.height * r);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  }
   return c.toDataURL('image/jpeg', 0.85);
 }
 
@@ -261,6 +275,25 @@ function field(obj, path, kind, label, o = {}) {
     wrap.append(btn('btn sm', '+ Add person', () => { arr.push(blankPerson()); changed(true); }));
     return wrap;
   }
+  if (kind === 'photos') {
+    const arr = arrP(obj, path), grid = h('div', 'thumbs'), fi = h('input');
+    arr.forEach((src, i) => {
+      const t = h('div', 'thumb'), img = h('img'), acts = h('div', 'acts');
+      img.src = src; img.alt = '';
+      acts.append(btn('ib', '↑', () => move(arr, i, -1), 'Move up'), btn('ib', '↓', () => move(arr, i, 1), 'Move down'),
+        btn('ib', '×', () => { arr.splice(i, 1); changed(true); }, 'Remove photo'));
+      t.append(img, acts); grid.append(t);
+    });
+    fi.type = 'file'; fi.accept = 'image/*'; fi.multiple = true; fi.hidden = true;
+    fi.onchange = async () => {
+      for (const f of fi.files) {
+        try { arr.push(await loadPhoto(f, 2000, false)); } catch { alert(`Could not read ${f.name}`); }
+      }
+      changed(true);
+    };
+    wrap.append(grid, fi, btn('btn sm', '+ Add photos', () => fi.click()));
+    return wrap;
+  }
   if (kind === 'check') {
     const cb = h('input'); cb.type = 'checkbox'; cb.checked = !!getP(obj, path);
     cb.onchange = () => { setP(obj, path, cb.checked); changed(); };
@@ -290,7 +323,7 @@ function personRow(p, arr, i, o) {
   };
   fi.onchange = async () => {
     const f = fi.files[0]; if (!f) return;
-    try { p.photo = await squarePhoto(f); } catch { alert('Could not read this image'); return; }
+    try { p.photo = await loadPhoto(f); } catch { alert('Could not read this image'); return; }
     paint(); remember(p); changed();
   };
   const inp = (key, ph_) => { const e = h('input'); e.placeholder = ph_; e.value = p[key] || ''; e.oninput = () => { p[key] = e.value; if (key === 'name') ph.dataset.i = initial(p.name); changed(); }; e.onchange = () => remember(p); return e; };
@@ -317,7 +350,7 @@ function personRow(p, arr, i, o) {
 
 // ---------- post list / library ----------
 const postLabel = (p, i) => {
-  const t = p.papers?.[0]?.title || p.title || p.headline || p.award || '';
+  const t = p.papers?.[0]?.title || p.title || p.headline || p.award || (p.photos?.length ? `${p.photos.length} photos` : '');
   const v = p.type === 'paper' && p.venue?.short ? `${p.venue.short} ${p.venue.year || ''} · ` : '';
   return `${i + 1}. ${TYPES[p.type]}: ${v}${t.replace(/\*/g, '').slice(0, 50) || '(untitled)'}`;
 };

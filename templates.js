@@ -193,6 +193,12 @@ const TPL = {
       ${p.event ? `<p class="sub strong">${rich(p.event)}</p>` : ''}
       <div class="main">${p.project ? `<div class="card ink proj end">${glyph(topic(p.project))}<p class="stmt">“${rich(p.project)}”</p></div>` : ''}${pl.beside}</div>${pl.below}` }];
   },
+
+  // photo frame: logos + photos + footer, no text (conference, talks, lab activities)
+  photo(p) {
+    return chunk(p.photos || [], 4).map(ch => ({ v: 'photo', side: '',
+      html: `<div class="shots" data-n="${ch.length}">${ch.map(src => `<img src="${esc(src)}" alt="">`).join('')}</div>` }));
+  },
 };
 
 // ---------- frame ----------

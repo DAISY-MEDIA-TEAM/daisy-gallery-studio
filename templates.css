@@ -171,6 +171,19 @@
 .proj{flex:1}
 .proj .stmt{max-width:20em}
 
+/* ---------- photo frame: photos only, same radius and gap as the cards ---------- */
+.shots{flex:1;min-height:0;display:grid;gap:2.4em;grid-template-columns:minmax(0,1fr)}
+.shots:empty{background:var(--tone);border-radius:2.8em}
+.shots img{display:block;width:100%;height:100%;min-height:0;object-fit:cover;object-position:50% 40%;border-radius:2.8em}
+.shots[data-n="2"]{grid-template-rows:1fr 1fr}
+.shots[data-n="3"]{grid-template-columns:1fr 1fr;grid-template-rows:1.4fr 1fr}
+.shots[data-n="3"] img:first-child{grid-column:1/-1}
+.shots[data-n="4"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.land.photo .hd,.land.photo .ft{grid-column:1/3}
+.land .shots[data-n="2"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr}
+.land .shots[data-n="3"]{grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr}
+.land .shots[data-n="3"] img:first-child{grid-column:1;grid-row:1/3}
+
 /* ---------- landscape: left column = text, right column = people / list ---------- */
 .land{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:2.4em 4.4em;padding:4.4em 5em 3.4em}
 .land .hd{grid-column:1;height:7em}
