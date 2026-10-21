@@ -51,16 +51,23 @@
 .card.end>:nth-child(1 of :not(.gw)){margin-top:auto}
 .red .small,.ink .small{opacity:.85}
 
-/* research glyph: tone-on-tone in a card corner, cropped by the edge, behind the text */
+/* research glyph: a field object in flat tone steps, cropped in a card corner, behind the text.
+   --g0 card ground (cuts), --g1 shade/full tone, --g2 lit/half tone — opaque, so overlapping faces stay distinct */
 .gw{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none}
-.glyph{position:absolute;right:-4em;top:-4em;width:28em;height:28em;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
-.glyph .f{fill:currentColor;stroke:none}
-.glyph .t{opacity:.55}
-.red .glyph{color:var(--red-2)}
-.ink .glyph{color:rgba(255,255,255,.1)}
-.white .glyph{color:var(--tone)}
-.pitem .glyph{width:20em;height:20em;right:-3em;top:-3em}
-.plist[data-n="3"] .glyph,.plist[data-n="4"] .glyph{width:15em;height:15em}
+.glyph{position:absolute;right:-6em;top:-6em;width:40em;height:40em;fill:var(--g1);stroke:none}
+.glyph .h{fill:var(--g2)}
+.glyph .g{fill:var(--g0)}
+.glyph .b,.glyph .d{fill:none;stroke:var(--g1);stroke-linecap:round;stroke-linejoin:round}
+.glyph .b{stroke-width:11}
+.glyph .d{stroke-width:5}
+.glyph .b.w{stroke-width:16}
+.glyph .b.h,.glyph .d.h{stroke:var(--g2)}
+.glyph .b.g,.glyph .d.g{stroke:var(--g0)}
+.card.red{--g0:var(--red);--g1:#AE000E;--g2:#C10012}
+.card.ink{--g0:var(--ink);--g1:#33262A;--g2:#271719}
+.card.white{--g0:#fff;--g1:#ECE6DF;--g2:#F5F2EE}
+.pitem .glyph{width:26em;height:26em;right:-4em;top:-4em}
+.plist[data-n="3"] .glyph,.plist[data-n="4"] .glyph{width:19em;height:19em;right:-3em;top:-3em}
 
 /* ---------- people ---------- */
 .av{position:relative;flex:none;width:var(--s,9em);height:var(--s,9em);border-radius:2em;overflow:hidden;background:var(--tone);display:grid;place-items:center}

@@ -47,44 +47,63 @@ const daisy = (petal = 'var(--red)', center = '#fff', n = 16) => {
   return `<svg viewBox="0 0 100 100"><g style="fill:${petal}">${e}</g><circle cx="50" cy="50" r="11" style="fill:${center}"/></svg>`;
 };
 
-// ---------- research glyphs: the petals of the DAISY logo (+ its centre), tone-on-tone, cropped by the card edge ----------
-const ring = (n, r, a0 = 0) => Array.from({ length: n }, (_, i) => { const a = a0 + i * 2 * Math.PI / n; return [100 + r * Math.cos(a), 100 + r * Math.sin(a)].map(v => +v.toFixed(1)); });
-const GLYPHS = {
-  // infinity loop with an entangled pair
-  quantum: () => `<path d="M100 100C84 76 66 64 48 64C28 64 14 80 14 100C14 120 28 136 48 136C66 136 84 124 100 100C116 76 134 64 152 64C172 64 186 80 186 100C186 120 172 136 152 136C134 136 116 124 100 100Z"/><circle cx="48" cy="100" r="9" class="f"/><circle cx="152" cy="100" r="9" class="f"/>`,
+// ---------- research glyphs: one object per field, drawn in flat tone steps ----------
+// One language: filled shapes in two tones of the card colour (.h = lit/half, default = shade/full), .g = cut in the
+// card's own ground colour, .b = 11-unit band, .d = 5-unit detail band, round caps. Three levels: body, parts, small marks.
+// helpers live inside the IIFE: index.html has its own globals (P, h, $…) and classic scripts share one scope
+const GLYPHS = (() => {
+const C = (cx, cy, r, c = '') => `<circle cx="${cx}" cy="${cy}" r="${r}"${c && ` class="${c}"`}/>`;
+const B = (d, c = '') => `<path d="${d}" class="b ${c}"/>`;
+const D = (d, c = '') => `<path d="${d}" class="d ${c}"/>`;
+const P = (d, c = '') => `<path d="${d}"${c && ` class="${c}"`}/>`;
+return {
+  // Bloch sphere: lit sphere, shadow crescent, equator and state vector cut in the ground
+  quantum: () => C(100, 100, 80, 'h') + P('M146.9 35.2A80 80 0 1 1 35.2 146.9A80 80 0 0 0 146.9 35.2Z')
+    + `<ellipse cx="100" cy="100" rx="80" ry="22" class="d g"/>` + D('M100 100L146 50', 'g') + C(146, 50, 10, 'g') + C(100, 100, 7, 'g')
+    + D('M100 2V12') + D('M100 188V198'),
+  // double helix: back strand half, rungs, front strand full (over/under crossings)
   bio: () => {
-    let a = '', b = '', r = '';
-    for (let y = 0; y <= 200; y += 5) {
-      const x1 = 100 + 46 * Math.sin(y / 26), x2 = 100 - 46 * Math.sin(y / 26);
-      a += `${y ? 'L' : 'M'}${x1.toFixed(1)} ${y}`; b += `${y ? 'L' : 'M'}${x2.toFixed(1)} ${y}`;
-      if (y % 20 === 10) r += `<line x1="${x1.toFixed(1)}" y1="${y}" x2="${x2.toFixed(1)}" y2="${y}" class="t"/>`;
-    }
-    return `<path d="${a}"/><path d="${b}"/>${r}`;
+    const x = (y, k) => 100 + k * 50 * Math.sin(y / 28), seg = { a: [[], []], b: [[], []] };
+    let rungs = '';
+    for (let y = -10; y <= 210; y += 4) for (const [k, n] of [[1, 'a'], [-1, 'b']]) seg[n][k * Math.cos(y / 28) > 0 ? 0 : 1].push([x(y, k), y]);
+    for (let y = 6; y <= 200; y += 16) rungs += D(`M${x(y, 1).toFixed(1)} ${y}H${x(y, -1).toFixed(1)}`, 'h') + C(100, y, 3, 'g');
+    // split a strand into continuous runs so front/back pieces don't join across gaps
+    const runs = pts => { const out = []; let cur = []; pts.forEach((p, i) => { if (i && p[1] - pts[i - 1][1] > 4) { out.push(cur); cur = []; } cur.push(p); }); out.push(cur); return out.filter(r => r.length > 1); };
+    const path = pts => runs(pts).map(r => B('M' + r.map(([a, b]) => `${a.toFixed(1)} ${b}`).join('L'), 'w')).join('');
+    return path(seg.a[1]).replace(/class="b /g, 'class="b h ') + path(seg.b[1]).replace(/class="b /g, 'class="b h ') + rungs + path(seg.a[0]) + path(seg.b[0]);
   },
-  // heart with an ECG trace through it
-  health: () => `<path d="M100 172C58 140 22 112 22 74C22 48 42 30 64 30C80 30 92 40 100 54C108 40 120 30 136 30C158 30 178 48 178 74C178 112 142 140 100 172Z"/><path d="M6 104H62l10-24 14 52 14-64 12 46 8-10H194"/>`,
-  // one pulse
-  signal: () => `<path d="M8 104H64C76 104 80 40 94 40C110 40 110 168 126 168C138 168 140 104 152 104H192"/><path d="M8 150H192" class="t"/>`,
-  // padlock in a ring of four nodes
-  security: () => `<circle cx="100" cy="100" r="74" class="t"/>${ring(4, 74, -Math.PI / 2).map(([x, y]) => `<circle cx="${x}" cy="${y}" r="11" class="f"/>`).join('')}<path d="M80 98V82a20 20 0 0 1 40 0v16"/><rect x="70" y="98" width="60" height="46" rx="8" class="f"/>`,
-  // block diagram: split, two rows of blocks, merge, out
-  system: () => `<path d="M10 100H36M36 65V135M36 65H52M36 135H52M88 65H108M88 135H108M132 78V114M148 65H168V135H148M168 100H186"/>`
-    + [[56, 52], [112, 52], [56, 122], [112, 122]].map(([x, y]) => `<rect x="${x}" y="${y}" width="32" height="26" rx="4" class="f"/>`).join('')
-    + `<path d="M196 100l-12-7v14zM112 65l-9-5v10zM112 135l-9-5v10zM132 122l-5-9h10z" class="f"/>`,
-  // node graph
-  network: () => {
-    const n = [[30, 150], [62, 92], [112, 128], [96, 40], [150, 70], [170, 140], [128, 180], [60, 196]];
-    const e = [[0, 1], [1, 2], [1, 3], [3, 4], [2, 4], [4, 5], [2, 5], [2, 6], [5, 6], [0, 7], [6, 7], [0, 2]];
-    return e.map(([a, b]) => `<line x1="${n[a][0]}" y1="${n[a][1]}" x2="${n[b][0]}" y2="${n[b][1]}"/>`).join('')
-      + n.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i === 2 ? 11 : 7}" class="f"/>`).join('');
+  // medicine: a two-tone capsule (shade half / lit half), a scored tablet, granules
+  health: () => `<g transform="rotate(-40 100 100)"><path d="M100 64H58A36 36 0 0 0 58 136H100Z"/><path d="M100 64H142A36 36 0 0 1 142 136H100Z" class="h"/></g>`
+    + D('M58 84L80 66', 'g') + C(150, 156, 30) + D('M129 135L171 177', 'g') + C(60, 160, 6, 'h') + C(80, 178, 4, 'h') + C(44, 182, 4, 'h'),
+  // a recording: mirrored waveform bars, loud burst full, quiet bars half, a playhead
+  signal: () => [10, 18, 34, 22, 52, 84, 128, 96, 146, 70, 40, 56, 24, 30, 12].map((h, i) => B(`M${16 + i * 12} ${100 - h / 2}V${100 + h / 2}`, h > 60 ? '' : 'h')).join('')
+    + D('M124 20V180', 'g') + C(124, 20, 8, 'g'),
+  // shield: shade half, lit half, keyhole and rivets cut in the ground
+  security: () => P('M100 12L172 38V94C172 140 142 170 100 190C58 170 28 140 28 94V38Z') + P('M100 12L28 38V94C28 140 58 170 100 190Z', 'h')
+    + C(100, 88, 16, 'g') + P('M92 98L86 140H114L108 98Z', 'g')
+    + [[100, 26], [56, 44], [144, 44], [42, 96], [158, 96]].map(([a, b]) => C(a, b, 4, 'g')).join(''),
+  // chip: body, pins on four sides, lit die, core with bond pads, pin-1 mark
+  system: () => [58, 79, 100, 121, 142].map(v => B(`M${v} 14V36`, 'h') + B(`M${v} 164V186`, 'h') + B(`M14 ${v}H36`, 'h') + B(`M164 ${v}H186`, 'h')).join('')
+    + `<rect x="36" y="36" width="128" height="128" rx="16"/><rect x="62" y="62" width="76" height="76" rx="8" class="h"/><rect x="82" y="82" width="36" height="36" rx="4"/>`
+    + [[90, 90], [110, 90], [90, 110], [110, 110]].map(([a, b]) => C(a, b, 3.5, 'g')).join('') + C(52, 52, 6, 'g'),
+  // globe with links: shaded globe, lit hemisphere, graticule cut in the ground, arcs out to nodes
+  network: () => C(86, 114, 70) + P('M86 44A70 70 0 0 0 86 184A40 70 0 0 1 86 44Z', 'h')
+    + `<ellipse cx="86" cy="114" rx="34" ry="70" class="d g"/>` + D('M86 44V184M16 114H156M24 80H148M24 148H148', 'g')
+    + B('M126 58Q146 24 172 26') + B('M152 100Q174 86 182 106') + C(172, 26, 13) + C(182, 106, 13) + C(168, 22, 5, 'h') + C(178, 102, 5, 'h'),
+  // database: three stacked cylinders, lit tops, ground cuts between them, status lights
+  data: () => [136, 88, 40].map(t => P(`M36 ${t}V${t + 34}A64 16 0 0 0 164 ${t + 34}V${t}Z`) + D(`M36 ${t + 34}A64 16 0 0 0 164 ${t + 34}`, 'g')
+    + `<ellipse cx="100" cy="${t}" rx="64" ry="16" class="h"/>` + C(140, t + 24, 4, 'g') + C(126, t + 26, 4, 'g')).join(''),
+  // layered neural net: links half, one path full, nodes with a lit spot
+  ai: () => {
+    const L = [[[36, 56], [36, 100], [36, 144]], [[100, 36], [100, 78], [100, 122], [100, 164]], [[164, 76], [164, 124]]];
+    const hot = [[0, 1], [1, 2], [2, 0]];
+    let links = '';
+    for (let l = 0; l < 2; l++) for (const [a, b] of L[l]) for (const [c, e] of L[l + 1]) links += D(`M${a} ${b}L${c} ${e}`, 'h');
+    const path = D(`M${L[0][1].join(' ')}L${L[1][2].join(' ')}L${L[2][0].join(' ')}`);
+    return links + path + L.flat().map(([a, b]) => C(a, b, 15) + C(a - 4, b - 4, 6, 'h')).join('');
   },
-  // three rows of data, one ending in a node
-  data: () => `<path d="M30 58H170M30 100H130M30 142H170"/><circle cx="148" cy="100" r="16"/>`,
-  // the centre of the logo: a hub with eight spokes inside an octagon
-  ai: () => `<path d="M${ring(8, 92, Math.PI / 8).map(p => p.join(' ')).join('L')}Z" class="t"/>`
-    + ring(8, 60).map(([x, y]) => `<line x1="100" y1="100" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r="9" class="f"/>`).join('')
-    + `<circle cx="100" cy="100" r="17" class="f"/>`,
 };
+})();
 // Keywords per topic, matched at the start of a word (add \b for a whole word). Order = tie-break: specific fields first.
 // Field petals (quantum…security) count double: a title's field beats the generic method words (graph, routing, learning).
 const TOPICS = [
