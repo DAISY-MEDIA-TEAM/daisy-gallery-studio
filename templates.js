@@ -47,17 +47,12 @@ const daisy = (petal = 'var(--red)', center = '#fff', n = 16) => {
   return `<svg viewBox="0 0 100 100"><g style="fill:${petal}">${e}</g><circle cx="50" cy="50" r="11" style="fill:${center}"/></svg>`;
 };
 
-// ---------- research glyphs: one small tone-on-tone drawing per poster, picked from the topic ----------
-// Drawn from the lab's own fields (the petals of the DAISY logo and its papers); cropped by the card edge.
+// ---------- research glyphs: the petals of the DAISY logo (+ its centre), tone-on-tone, cropped by the card edge ----------
+const ring = (n, r, a0 = 0) => Array.from({ length: n }, (_, i) => { const a = a0 + i * 2 * Math.PI / n; return [100 + r * Math.cos(a), 100 + r * Math.sin(a)].map(v => +v.toFixed(1)); });
 const GLYPHS = {
-  graph: () => {
-    const n = [[30, 150], [62, 92], [112, 128], [96, 40], [150, 70], [170, 140], [128, 180], [60, 196]];
-    const e = [[0, 1], [1, 2], [1, 3], [3, 4], [2, 4], [4, 5], [2, 5], [2, 6], [5, 6], [0, 7], [6, 7], [0, 2]];
-    return e.map(([a, b]) => `<line x1="${n[a][0]}" y1="${n[a][1]}" x2="${n[b][0]}" y2="${n[b][1]}"/>`).join('')
-      + n.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i === 2 ? 11 : 7}" class="f"/>`).join('');
-  },
-  wave: () => `<path d="M0 110h26l8-34 10 70 9-52 7 16h22l7-58 9 112 8-74 6 20h24l8-30 9 52 7-22h30"/><path d="M0 160h34l6-14 8 26 7-12h40l6-20 8 32 6-12h85" class="t"/>`,
-  helix: () => {
+  // infinity loop with an entangled pair
+  quantum: () => `<path d="M100 100C84 76 66 64 48 64C28 64 14 80 14 100C14 120 28 136 48 136C66 136 84 124 100 100C116 76 134 64 152 64C172 64 186 80 186 100C186 120 172 136 152 136C134 136 116 124 100 100Z"/><circle cx="48" cy="100" r="9" class="f"/><circle cx="152" cy="100" r="9" class="f"/>`,
+  bio: () => {
     let a = '', b = '', r = '';
     for (let y = 0; y <= 200; y += 5) {
       const x1 = 100 + 46 * Math.sin(y / 26), x2 = 100 - 46 * Math.sin(y / 26);
@@ -66,28 +61,49 @@ const GLYPHS = {
     }
     return `<path d="${a}"/><path d="${b}"/>${r}`;
   },
-  qubit: () => `<ellipse cx="100" cy="100" rx="88" ry="34" transform="rotate(-28 100 100)"/><ellipse cx="100" cy="100" rx="88" ry="34" transform="rotate(28 100 100)"/><ellipse cx="100" cy="100" rx="88" ry="34" transform="rotate(90 100 100)" class="t"/><circle cx="100" cy="100" r="10" class="f"/><circle cx="178" cy="58" r="6" class="f"/><circle cx="34" cy="162" r="6" class="f"/>`,
-  shield: () => {
-    const hex = (cx, cy, s = 30) => `<path d="${[0, 1, 2, 3, 4, 5].map(i => { const a = Math.PI / 3 * i + Math.PI / 6; return `${i ? 'L' : 'M'}${(cx + s * Math.cos(a)).toFixed(1)} ${(cy + s * Math.sin(a)).toFixed(1)}`; }).join('')}Z"/>`;
-    const w = 30 * Math.sqrt(3);
-    return [[100, 100], [100 + w, 100], [100 - w, 100], [100 + w / 2, 55], [100 - w / 2, 55], [100 + w / 2, 145], [100 - w / 2, 145]]
-      .map(([x, y]) => hex(x, y)).join('') + '<circle cx="100" cy="100" r="9" class="f"/>';
+  // heart with an ECG trace through it
+  health: () => `<path d="M100 172C58 140 22 112 22 74C22 48 42 30 64 30C80 30 92 40 100 54C108 40 120 30 136 30C158 30 178 48 178 74C178 112 142 140 100 172Z"/><path d="M6 104H62l10-24 14 52 14-64 12 46 8-10H194"/>`,
+  // one pulse
+  signal: () => `<path d="M8 104H64C76 104 80 40 94 40C110 40 110 168 126 168C138 168 140 104 152 104H192"/><path d="M8 150H192" class="t"/>`,
+  // padlock in a ring of four nodes
+  security: () => `<circle cx="100" cy="100" r="74" class="t"/>${ring(4, 74, -Math.PI / 2).map(([x, y]) => `<circle cx="${x}" cy="${y}" r="11" class="f"/>`).join('')}<path d="M80 98V82a20 20 0 0 1 40 0v16"/><rect x="70" y="98" width="60" height="46" rx="8" class="f"/>`,
+  // block diagram: split, two rows of blocks, merge, out
+  system: () => `<path d="M10 100H36M36 65V135M36 65H52M36 135H52M88 65H108M88 135H108M132 78V114M148 65H168V135H148M168 100H186"/>`
+    + [[56, 52], [112, 52], [56, 122], [112, 122]].map(([x, y]) => `<rect x="${x}" y="${y}" width="32" height="26" rx="4" class="f"/>`).join('')
+    + `<path d="M196 100l-12-7v14zM112 65l-9-5v10zM112 135l-9-5v10zM132 122l-5-9h10z" class="f"/>`,
+  // node graph
+  network: () => {
+    const n = [[30, 150], [62, 92], [112, 128], [96, 40], [150, 70], [170, 140], [128, 180], [60, 196]];
+    const e = [[0, 1], [1, 2], [1, 3], [3, 4], [2, 4], [4, 5], [2, 5], [2, 6], [5, 6], [0, 7], [6, 7], [0, 2]];
+    return e.map(([a, b]) => `<line x1="${n[a][0]}" y1="${n[a][1]}" x2="${n[b][0]}" y2="${n[b][1]}"/>`).join('')
+      + n.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i === 2 ? 11 : 7}" class="f"/>`).join('');
   },
-  mesh: () => {
-    const p = [[100, 22], [168, 60], [172, 142], [100, 184], [30, 142], [26, 62]];
-    return p.map(([x, y]) => `<line x1="100" y1="100" x2="${x}" y2="${y}" class="t"/><rect x="${x - 9}" y="${y - 9}" width="18" height="18" rx="3" class="f"/>`).join('')
-      + p.map(([x, y], i) => { const [u, v] = p[(i + 1) % 6]; return `<line x1="${x}" y1="${y}" x2="${u}" y2="${v}"/>`; }).join('')
-      + '<circle cx="100" cy="100" r="16"/><circle cx="100" cy="100" r="6" class="f"/>';
-  },
+  // three rows of data, one ending in a node
+  data: () => `<path d="M30 58H170M30 100H130M30 142H170"/><circle cx="148" cy="100" r="16"/>`,
+  // the centre of the logo: a hub with eight spokes inside an octagon
+  ai: () => `<path d="M${ring(8, 92, Math.PI / 8).map(p => p.join(' ')).join('L')}Z" class="t"/>`
+    + ring(8, 60).map(([x, y]) => `<line x1="100" y1="100" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r="9" class="f"/>`).join('')
+    + `<circle cx="100" cy="100" r="17" class="f"/>`,
 };
-// ponytail: keyword match on the title; a lab-wide tag field would be the upgrade if titles mislead
+// Keywords per topic, matched at the start of a word (add \b for a whole word). Order = tie-break: specific fields first.
+// Field petals (quantum…security) count double: a title's field beats the generic method words (graph, routing, learning).
+const TOPICS = [
+  ['quantum', 2, ['quantum', 'qubit', 'ghz', 'entangl', 'teleport', 'qkd', 'superposition', 'qaoa', 'vqe']],
+  ['bio', 2, ['gene', 'genom', 'dna', 'rna', 'protein', 'bio', 'als\\b', 'transcript', 'omics', 'cell\\b', 'cells\\b', 'molecul', 'drug', 'mutation', 'enzyme', 'neuron']],
+  ['health', 2, ['health', 'medic', 'clinic', 'patient', 'disease', 'diagnos', 'cardi', 'heart', 'ecg', 'hospital', 'mental', 'sleep', 'cancer', 'tumor', 'covid', 'alzheimer', 'parkinson', 'depression', 'fitness', 'wearable']],
+  ['signal', 2, ['signal', 'eeg', 'emg', 'bci\\b', 'brain-computer', 'audio', 'speech', 'sound', 'acoustic', 'radar', 'spectrum', 'spectral', 'frequency', 'fourier', 'wavelet', 'time.?series', 'vibration']],
+  ['security', 2, ['secur', 'privacy', 'private', 'intrusion', 'attack', 'malware', 'adversar', 'encrypt', 'crypt', 'blockchain', 'threat', 'phishing', 'cyber', 'authenticat', 'fraud', 'anomal', 'ddos', 'vulnerab', 'forensic', 'watermark']],
+  ['system', 1, ['iot\\b', 'internet of things', 'edge\\b', 'embedded', 'fpga', 'control', 'robot', 'uav', 'drone', 'vehicle', 'autonomous', 'cloud', 'schedul', 'pipeline', 'architecture', 'hardware', 'smart home', 'smart city', 'digital twin', 'cyber-physical', 'sensor']],
+  ['network', 1, ['network', 'graph', 'gnn', 'routing', 'wireless', '5g\\b', '6g\\b', 'sdn\\b', 'multicast', 'topology', 'social', 'link prediction', 'satellite', 'traffic', 'communicat', 'telecom', 'mimo', 'beamform', 'mesh', 'p2p', 'peer-to-peer']],
+  ['data', 1, ['data', 'database', 'big data', 'mining', 'analytic', 'nlp\\b', 'language', 'text', 'document', 'retrieval', 'rag\\b', 'search', 'recommend', 'question answering', 'summari', 'translat', 'sentiment', 'tabular', 'sql', 'ocr\\b']],
+  ['ai', 1, ['ai\\b', 'artificial intelligence', 'intelligen', 'deep learning', 'machine learning', 'learning', 'neural', 'transformer', 'llm', 'gpt', 'bert\\b', 'generative', 'gans?\\b', 'diffusion', 'vision', 'image', 'video', 'classif', 'reinforcement', 'agent', 'augment', 'attention', 'cnn', 'lstm', 'multimodal', 'foundation model']],
+].map(([k, wt, ws]) => [k, wt, ws.map(w => new RegExp(`\\b${w}`))]);
+// ponytail: keyword scoring (weighted distinct hits, ties by TOPICS order, nothing → ai); a per-post topic field if titles mislead
 const topic = text => {
-  const s = String(text || '').toLowerCase();
-  return /\b(eeg|ecg|emg|signal|wearable)/.test(s) ? 'wave'
-    : /\b(gene|dna|als\b|bio|protein|genom)/.test(s) ? 'helix'
-    : /\b(quantum|qubit|ghz|entangle)/.test(s) ? 'qubit'
-    : /\b(intrusion|security|attack|malware|privacy|anomal)/.test(s) ? 'shield'
-    : /\b(iot|sensor|edge device)/.test(s) ? 'mesh' : 'graph';
+  const s = String(text || '').toLowerCase().replace(/neural networks?/g, 'neural');
+  let best = 'ai', top = 0;
+  for (const [k, wt, res] of TOPICS) { const n = wt * res.filter(r => r.test(s)).length; if (n > top) { best = k; top = n; } }
+  return best;
 };
 // wrapped in a clipping layer so the deliberate crop does not count as overflow in fit()
 const glyph = kind => `<span class="gw"><svg class="glyph" viewBox="0 0 200 200" aria-hidden="true">${GLYPHS[kind]()}</svg></span>`;
@@ -106,8 +122,8 @@ const placePeople = (list, ctx, sub) => ctx.land ? { beside: '', below: '', side
   : list.length <= 2 ? { beside: crewCard(list, sub), below: '', side: '' }
   : { beside: '', below: pplRow(list, sub), side: '' };
 
-// portrait: --c columns; landscape: --c2 columns
-const chipVars = n => `--c:${Math.min(n, 4) || 1};--c2:${Math.min(n, 2) || 1}`;
+// at least 2 columns, so 1 and 2 people get the same photo size; photos only shrink from 3 people (landscape is always 2 columns)
+const chipVars = n => `--c:${Math.max(2, Math.min(n, 4))}`;
 
 // ---------- templates ----------
 const TPL = {
@@ -128,7 +144,7 @@ const TPL = {
     const vname = [v.short, v.year].filter(Boolean).join(' ');
     return chunk(list, p.split ? (ctx.land || ctx.key === '1:1' ? 2 : 3) : 4).map(ch => {
       const cards = `<div class="plist" data-n="${ch.length}">${ch.map(pp => `
-        <div class="card white pitem">
+        <div class="card white pitem">${glyph(topic(pp.title))}
           <p class="ptitle">${rich(pp.title)}</p>
           ${pp.venue ? `<p class="pvenue">${esc(pp.venue)}</p>` : ''}
           <div class="chips" style="${chipVars(crewList(pp.authors, pp.advisors).length)}">${crewList(pp.authors, pp.advisors).map(x =>
@@ -152,7 +168,7 @@ const TPL = {
         ${pills([T.welcomeP], p.term && [esc(p.term), 'red'])}
         <h1 class="h1">${rich(p.title) || esc(T.welcome(all.length))}</h1>
         ${p.subtitle ? `<p class="sub">${rich(p.subtitle)}</p>` : ''}
-        ${ctx.land ? `<div class="card ink mark end">${glyph('graph')}<p class="day">${all.length}</p><p class="lead">${all.length > 1 ? 'new members' : 'new member'}</p></div>` : grid}` };
+        ${ctx.land ? `<div class="card ink mark end">${glyph(topic(all.map(m => who(m).interest).join(' ')))}<p class="day">${all.length}</p><p class="lead">${all.length > 1 ? 'new members' : 'new member'}</p></div>` : grid}` };
     });
   },
 
@@ -182,7 +198,7 @@ const TPL = {
       <h1 class="h1 xl">${rich(p.headline)}</h1>
       ${p.intro ? `<p class="sub">${rich(p.intro)}</p>` : ''}
       ${ctx.land ? '' : lists}
-      <div class="card red cta">${glyph('graph')}
+      <div class="card red cta">${glyph(topic((p.areas || []).join(' ')))}
         ${p.contact ? `<div><p class="small">${T.apply}</p><p class="big">${esc(p.contact)}</p></div>` : ''}
         ${p.deadline ? `<div class="dl"><p class="small">${T.deadline}</p><p class="lead">${esc(p.deadline)}</p></div>` : ''}
       </div>` }];

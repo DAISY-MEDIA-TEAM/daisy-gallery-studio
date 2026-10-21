@@ -58,6 +58,9 @@
 .glyph .t{opacity:.55}
 .red .glyph{color:var(--red-2)}
 .ink .glyph{color:rgba(255,255,255,.1)}
+.white .glyph{color:var(--tone)}
+.pitem .glyph{width:20em;height:20em;right:-3em;top:-3em}
+.plist[data-n="3"] .glyph,.plist[data-n="4"] .glyph{width:15em;height:15em}
 
 /* ---------- people ---------- */
 .av{position:relative;flex:none;width:var(--s,9em);height:var(--s,9em);border-radius:2em;overflow:hidden;background:var(--tone);display:grid;place-items:center}
@@ -103,10 +106,10 @@
 .plist{flex:1;min-height:0;display:flex;flex-direction:column;gap:2em}
 .pitem{flex:1;padding:3em 3.4em}
 .ptitle{font-size:3em;font-weight:800;line-height:1.18;letter-spacing:-.015em}
-.chips{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--c),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:1.6em;padding-top:1.8em}
-.chip{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:.9em;min-width:0;min-height:0;container-type:inline-size}
+.chips{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--c),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:1.6em;padding-top:1.8em;container-type:inline-size}
+.chip{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:.9em;min-width:0;min-height:0}
 /* square photo grows into the space left under the title, capped by the column width */
-.chip .av{flex:0 1 auto;min-height:5em;height:100%;width:auto;max-width:100%;max-height:100cqw;aspect-ratio:1;border-radius:1.6em}
+.chip .av{flex:0 1 auto;min-height:5em;height:100%;width:auto;max-width:100%;max-height:calc((100cqw - (var(--c) - 1) * 1.6em) / var(--c));aspect-ratio:1;border-radius:1.6em}
 .chip b{display:block;font-size:2.6em;font-weight:800;line-height:1.12;letter-spacing:-.015em}
 .chip i{display:block;font-style:normal;font-size:1.9em;color:var(--red);font-weight:800;margin-top:.2em}
 .pvenue{font-size:2.2em;font-weight:800;color:var(--red);margin-top:.5em}
@@ -120,9 +123,10 @@
 .plist[data-n="3"] .chip b,.plist[data-n="4"] .chip b{font-size:2.2em}
 .plist[data-n="3"] .chip i,.plist[data-n="4"] .chip i{font-size:1.7em}
 /* landscape: people in two columns so photos stay large */
-.land .pside .chips{grid-template-columns:repeat(var(--c2),minmax(0,1fr));gap:1.2em 1.6em}
+.land .pside .chips{grid-template-columns:1fr 1fr;gap:1.2em 1.6em}
 .land .pside .chip{flex-direction:row;align-items:center;justify-content:flex-start;gap:1.6em}
-.land .pside .chip .av{flex:none;height:100%;max-width:45%;max-height:45cqw}
+/* square, at most 60% of the column, and always leaving 12em for the name */
+.land .pside .chip .av{flex:none;height:100%;max-height:min(calc((100cqw - 1.6em) / 2 * .6), calc((100cqw - 1.6em) / 2 - 12em))}
 .land .pside .chip b{font-size:2.6em}
 .land .pside .chip i{font-size:2.1em}
 
@@ -169,12 +173,12 @@
 .proj .stmt{max-width:20em}
 
 /* ---------- photo frame: photos with a thin paper border, one bar with a concave top edge ---------- */
-.cv.photo,.land.photo{display:flex;flex-direction:column;gap:0;padding:1.4em 1.4em 0}
+.cv.photo,.land.photo{display:flex;flex-direction:column;gap:0;padding:.6em .6em 0}
 .bleed{flex:1;min-height:0;display:flex}
-.shots{flex:1;min-height:0;display:grid;gap:1.4em;grid-template-columns:minmax(0,1fr)}
-.shots:empty{background:var(--tone);border-radius:1.2em}
+.shots{flex:1;min-height:0;display:grid;gap:.6em;grid-template-columns:minmax(0,1fr)}
+.shots:empty{background:var(--tone);border-radius:.8em}
 /* --px/--py: focal point, --pz: zoom (set per photo in the editor) */
-.shot{min-height:0;overflow:hidden;border-radius:1.2em}
+.shot{min-height:0;overflow:hidden;border-radius:.8em}
 .shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--px) var(--py);transform:scale(var(--pz));transform-origin:var(--px) var(--py)}
 .shots[data-n="2"]{grid-template-rows:1fr 1fr}
 .shots[data-n="3"]{grid-template-columns:1fr 1fr;grid-template-rows:1.4fr 1fr}
@@ -183,16 +187,16 @@
 .land .shots[data-n="2"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr}
 .land .shots[data-n="3"]{grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr}
 .land .shots[data-n="3"] .shot:first-child{grid-column:1;grid-row:1/3}
-.bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;gap:3em;margin:0 -1.4em;padding:1.4em 5em 3.6em;background:var(--paper)}
-.bar .curve{position:absolute;left:0;bottom:calc(100% - 1px);width:100%;height:6em;fill:var(--paper)}
-.logos{display:flex;align-items:center;gap:2.4em}
-.bar .logo,.bar .ptit{height:7.4em}
+.bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;gap:3em;margin:0 -.6em;padding:.6em 4.4em 2.4em;background:var(--paper)}
+.bar .curve{position:absolute;left:0;bottom:calc(100% - 1px);width:100%;height:4em;fill:var(--paper)}
+.logos{display:flex;align-items:center;gap:2em}
+.bar .logo,.bar .ptit{height:5.6em}
 .who{display:flex;flex-direction:column;align-items:flex-end;text-align:right;gap:.3em}
-.who b{font-size:2.8em;font-weight:800;letter-spacing:-.015em;line-height:1.15}
-.who span{font-size:2.2em;font-weight:600;color:var(--ink-2)}
-.land .bar{padding:1em 4.4em 2.8em}
-.land .bar .curve{height:4.5em}
-.land .bar .logo,.land .bar .ptit{height:6.4em}
+.who b{font-size:2.4em;font-weight:800;letter-spacing:-.015em;line-height:1.15}
+.who span{font-size:1.9em;font-weight:600;color:var(--ink-2)}
+.land .bar{padding:.4em 3.6em 1.8em}
+.land .bar .curve{height:3em}
+.land .bar .logo,.land .bar .ptit{height:5em}
 
 /* ---------- landscape: left column = text, right column = people / list ---------- */
 .land{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:2.4em 4.4em;padding:4.4em 5em 3.4em}
