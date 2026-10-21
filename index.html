@@ -61,8 +61,14 @@ form{display:flex;flex-direction:column;gap:14px}
 .ph.has img{display:block}
 .ph::after{content:'+';position:absolute;right:0;bottom:0;width:16px;height:16px;border-radius:50%;background:var(--ink);font-size:12px;line-height:16px;text-align:center}
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.thumb{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--cream)}
+.thumb{display:flex;flex-direction:column;gap:4px}
+.thumb .pic{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--cream)}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .zoom{display:flex;gap:4px;align-items:center}
+.thumb .zoom input{flex:1;min-width:0;padding:0;border:0;accent-color:var(--red)}
+.frame .shot{cursor:grab;touch-action:none}
+.frame .shot:active{cursor:grabbing}
+.frame .shot img{pointer-events:none}
 .thumb .acts{position:absolute;top:4px;right:4px;display:flex;gap:2px}
 .thumb .ib{width:22px;height:22px;font-size:10px}
 .lib summary{cursor:pointer;font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -243,6 +249,35 @@ function remember(p) {
   refreshLib(); save();
 }
 
+// photos were bare dataURL strings before position/zoom existed; upgrade on first touch
+const shotAt = (arr, i) => typeof arr[i] === 'string' ? (arr[i] = { src: arr[i] }) : arr[i];
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+// Drag a photo on the preview to move its focal point, wheel to zoom; saved on release
+// ponytail: drag speed is linear in the cell size, fine for zoom 1–4; per-axis overflow maths if it feels off
+function adjustable(cv, arr) {
+  let saveT;
+  cv.querySelectorAll('.shot').forEach(el => {
+    const s = shotAt(arr, +el.dataset.i);
+    const paint = () => { el.style.setProperty('--px', `${s.x ?? 50}%`); el.style.setProperty('--py', `${s.y ?? 40}%`); el.style.setProperty('--pz', s.z || 1); };
+    el.onpointerdown = e => {
+      e.preventDefault(); el.setPointerCapture(e.pointerId);
+      const r = el.getBoundingClientRect(), x0 = s.x ?? 50, y0 = s.y ?? 40;
+      el.onpointermove = m => {
+        s.x = +clamp(x0 - (m.clientX - e.clientX) / r.width * 100, 0, 100).toFixed(1);
+        s.y = +clamp(y0 - (m.clientY - e.clientY) / r.height * 100, 0, 100).toFixed(1);
+        paint();
+      };
+      el.onpointerup = el.onpointercancel = () => { el.onpointermove = null; changed(true); };
+    };
+    el.onwheel = e => {
+      e.preventDefault();
+      s.z = +clamp((s.z || 1) * (e.deltaY < 0 ? 1.1 : 1 / 1.1), 1, 4).toFixed(2);
+      paint(); clearTimeout(saveT); saveT = setTimeout(() => changed(true), 300);
+    };
+  });
+}
+
 // ---------- form ----------
 function changed(rebuild) {
   if (rebuild) buildForm();
@@ -277,21 +312,25 @@ function field(obj, path, kind, label, o = {}) {
   }
   if (kind === 'photos') {
     const arr = arrP(obj, path), grid = h('div', 'thumbs'), fi = h('input');
-    arr.forEach((src, i) => {
-      const t = h('div', 'thumb'), img = h('img'), acts = h('div', 'acts');
-      img.src = src; img.alt = '';
+    arr.forEach((_, i) => {
+      const s = shotAt(arr, i), t = h('div', 'thumb'), pic = h('div', 'pic'), img = h('img'), acts = h('div', 'acts'), zr = h('div', 'zoom'), z = h('input');
+      img.src = s.src; img.alt = '';
       acts.append(btn('ib', '↑', () => move(arr, i, -1), 'Move up'), btn('ib', '↓', () => move(arr, i, 1), 'Move down'),
         btn('ib', '×', () => { arr.splice(i, 1); changed(true); }, 'Remove photo'));
-      t.append(img, acts); grid.append(t);
+      z.type = 'range'; z.min = 1; z.max = 4; z.step = 0.05; z.value = s.z || 1; z.title = 'Zoom'; z.setAttribute('aria-label', 'Zoom');
+      z.oninput = () => { s.z = +z.value; changed(); };
+      zr.append(z, btn('ib', '⟲', () => { delete s.x; delete s.y; delete s.z; changed(true); }, 'Reset position and zoom'));
+      pic.append(img, acts); t.append(pic, zr); grid.append(t);
     });
     fi.type = 'file'; fi.accept = 'image/*'; fi.multiple = true; fi.hidden = true;
     fi.onchange = async () => {
       for (const f of fi.files) {
-        try { arr.push(await loadPhoto(f, 2000, false)); } catch { alert(`Could not read ${f.name}`); }
+        try { arr.push({ src: await loadPhoto(f, 2000, false) }); } catch { alert(`Could not read ${f.name}`); }
       }
       changed(true);
     };
     wrap.append(grid, fi, btn('btn sm', '+ Add photos', () => fi.click()));
+    if (arr.length) wrap.append(h('p', 'hint', 'Drag a photo on the preview to move it; scroll or use the slider to zoom.'));
     return wrap;
   }
   if (kind === 'check') {
@@ -399,6 +438,7 @@ function preview() {
     frame.style.cssText = `width:${s.W * scale}px;height:${s.H * scale}px`;
     cv.style.cssText = `--w:${s.W}px;--h:${s.H}px;transform:scale(${scale})`;
     cv.innerHTML = s.html;
+    if (post.type === 'photo') adjustable(cv, post.photos);
     frame.append(cv);
     cap.append(h('span', '', `${out.length > 1 ? `Slide ${i + 1}/${out.length} · ` : ''}${s.W * PIXEL_RATIO}×${s.H * PIXEL_RATIO}`), btn('btn sm', 'Export this slide', () => exportOne(cv, s)));
     item.append(frame, cap);

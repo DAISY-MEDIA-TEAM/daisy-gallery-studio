@@ -195,9 +195,11 @@ const TPL = {
   },
 
   // photo frame: logos + photos + footer, no text (conference, talks, lab activities)
+  // each photo: { src, x, y (focal %), z (zoom) }; old posts store bare dataURL strings
   photo(p) {
-    return chunk(p.photos || [], 4).map(ch => ({ v: 'photo', side: '',
-      html: `<div class="shots" data-n="${ch.length}">${ch.map(src => `<img src="${esc(src)}" alt="">`).join('')}</div>` }));
+    const list = (p.photos || []).map((s, i) => ({ ...(typeof s === 'string' ? { src: s } : s), i }));
+    return chunk(list, 4).map(ch => ({ v: 'photo', side: '',
+      html: `<div class="shots" data-n="${ch.length}">${ch.map(s => `<div class="shot" data-i="${s.i}" style="--px:${+(s.x ?? 50)}%;--py:${+(s.y ?? 40)}%;--pz:${+s.z || 1}"><img src="${esc(s.src)}" alt=""></div>`).join('')}</div>` }));
   },
 };
 

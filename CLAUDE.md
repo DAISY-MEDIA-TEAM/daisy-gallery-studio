@@ -37,7 +37,7 @@ A static web app that makes social-media posters for **DAISY Lab** (Data and Int
 | `event` | `tag`, `format?`, `title`, `desc?`, `speakers[]`, `date: YYYY-MM-DD`, `time`, `place` |
 | `recruit` | `headline`, `term?`, `intro?`, `areas[]`, `requirements[]`, `contact`, `deadline` |
 | `award` | `award`, `event?`, `project?`, `members[]`, `advisors[]` |
-| `photo` | `photos[]` (JPEG dataURLs, long edge ≤ 2000px). Photo frame: header logos + photos + footer, no text; 1–4 per image (1 full · 2 stacked · 3 = 1 big + 2 · 4 = 2×2), more → album via `chunk()` |
+| `photo` | `photos[]: { src, x?, y?, z? }` (src = JPEG dataURL, long edge ≤ 2000px; x/y focal % default 50/40, z zoom 1–4; legacy bare strings accepted, upgraded by `shotAt()`). Drag on the preview moves, wheel / form slider zooms. Photo frame: header logos + photos + footer, no text; 1–4 per image (1 full · 2 stacked · 3 = 1 big + 2 · 4 = 2×2), more → album via `chunk()` |
 
 Old posts may still carry `lang` or `*word*` markup; both are ignored (asterisks are stripped).
 
