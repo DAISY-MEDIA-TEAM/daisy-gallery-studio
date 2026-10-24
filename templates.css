@@ -137,6 +137,121 @@
 .land .pside .chip b{font-size:2.6em}
 .land .pside .chip i{font-size:2.1em}
 
+/* paper layouts: hero (conference photos), spot (first author big), type (venue name only) */
+.paper-hero .shots{flex:0 0 40%;gap:1.2em}
+.paper-hero .shot,.land .pside .shot{border-radius:2.8em}
+.paper-hero .main{flex:1}
+.paper-hero .h1,.paper-spot .h1,.paper-type .h1{font-size:5.2em;flex:none;padding-bottom:.12em}
+.paper-hero .venue{flex:0 0 40%}
+.folk{flex:1;padding:2.8em}
+.folk .chips{padding-top:0}
+.paper-spot .main{flex:1}
+.star{flex:0 0 52%;padding:0}
+.star .person{flex:1;min-height:0;gap:0}
+.star .av{flex:1 1 0;min-height:0;width:100%;height:auto;border-radius:0}
+.star figcaption{padding:2.2em 2.8em 2.6em}
+.star b{font-size:4em}
+.star span{font-size:2.3em;color:var(--ink-2);opacity:1}
+.venue.full{flex:1}
+.venue.full .vname{font-size:min(26em, calc(var(--k) * 100cqw / (var(--len) * .64)))}
+.byline{font-size:2.8em;line-height:1.5;display:flex;flex-wrap:wrap;column-gap:.5em}
+.byline b{font-weight:800}
+.byline i{font-style:normal;font-weight:800;color:var(--red);margin-left:.35em}
+.byline span{white-space:nowrap}
+.byline s{text-decoration:none;color:var(--ink-2)}
+.land .pside .shots{flex:1;gap:1.2em}
+.land .pside .star{flex:1}
+.land.paper-hero .venue{flex:0 0 42%;padding:2.8em}
+.land.paper-hero .folk{padding:2.2em}
+
+/* page: proceedings page — masthead, then a 42% axis (notes | title + authors) */
+.paper-page .shots,.paper-page .mast{flex:0 0 38%;gap:1.2em}
+.paper-page .shot{border-radius:2.8em}
+.paper-page .bd .shots[data-n="2"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr}
+.paper-page .bd .shots[data-n="3"]{grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:1fr}
+.paper-page .bd .shots[data-n="3"] .shot:first-child{grid-column:auto}
+.mast{container-type:inline-size;padding:3.6em 4em}
+.mast .vname{font-size:min(17em, calc(var(--k) * 100cqw / (var(--len) * .64)))}
+.axis{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,42fr) minmax(0,58fr);gap:4em}
+.notes{display:flex;flex-direction:column;gap:2em;padding-top:1em}
+.notes p{font-size:2.3em;line-height:1.35;font-weight:700}
+.notes span{display:block;font-weight:600;color:var(--ink-2);font-size:.85em;margin-bottom:.2em}
+.copy{display:flex;flex-direction:column;gap:3em;min-height:0}
+.paper-page .h1{font-size:5em}
+.alist{display:flex;flex-direction:column;gap:1.4em}
+.arow{display:flex;align-items:center;gap:1.6em;min-width:0}
+.arow .av{--s:7.6em;border-radius:99em}
+.arow b{display:block;font-size:2.6em;font-weight:800;line-height:1.15;letter-spacing:-.015em}
+.arow i{display:block;font-style:normal;font-size:1.9em;font-weight:800;color:var(--red)}
+.land.paper-page .axis{grid-template-columns:minmax(0,36fr) minmax(0,64fr);gap:3em}
+.land.paper-page .h1{font-size:4.2em}
+.land .pside .mast,.land .pside .shots{flex:1}
+
+/* motif: the topic glyph huge in red tones on the paper, cropped bottom-right, behind the text */
+.paper-motif .bd{position:relative;--g0:var(--paper);--g1:var(--red);--g2:#E4404B}
+.paper-motif .bd>:not(.gw){position:relative;z-index:1}
+.paper-motif .bd>.gw .glyph{top:auto;right:-30em;bottom:-22em;width:84em;height:84em}
+.vmotif{font-size:13em;font-weight:800;line-height:.88;letter-spacing:-.05em;color:var(--red)}
+.vmotif span{color:var(--ink)}
+.paper-motif .h1{font-size:6em;max-width:15em}
+.paper-motif .alist{margin-top:auto;max-width:40%}
+.paper-motif .arow .av{--s:9.6em}
+.land.paper-motif .bd>.gw .glyph{right:-10em;bottom:-12em;width:50em;height:50em}
+.land.paper-motif .vmotif{font-size:10em}
+.land.paper-motif .h1{font-size:4.2em;max-width:13em}
+.land .pside .alist{flex:1;justify-content:center;gap:2.4em}
+.land .pside .arow .av{--s:12em}
+.land .pside .arow b{font-size:3.2em}
+.land .pside .arow i{font-size:2.2em}
+
+/* loud: one flat red field, the status word and venue sized to fill the width, people stuck on at a tilt */
+.shout{flex:1;container-type:inline-size;gap:.6em;padding:3.6em 4em 4em}
+.shout .w1,.shout .w2{font-weight:900;line-height:.84;letter-spacing:-.05em;margin-left:-.05em;white-space:nowrap}
+.shout .w1{text-transform:uppercase;font-size:min(24em, calc(var(--k) * 100cqw / (var(--len) * .67)))}
+.shout .w2{color:var(--ink);font-size:min(17em, calc(var(--k) * 100cqw / (var(--len) * .64)))}
+.shout .w2 span{color:#fff}
+.stitle{font-size:4.4em;font-weight:800;line-height:1.12;letter-spacing:-.02em;margin-top:.6em;max-width:20em;text-wrap:balance}
+.tilt{--ph:23em;margin-top:auto;display:flex;gap:2.4em;padding:2em 1em 0}
+.tilt .pcard{flex:1 1 0;max-width:34em;color:var(--ink);transform:rotate(-3deg)}
+.tilt .pcard:nth-child(even){transform:rotate(2.5deg) translateY(-1.2em)}
+.tilt .pcard b{font-size:2.6em}
+.tilt .pcard span{font-size:1.8em}
+.tilt[data-n="1"],.tilt[data-n="2"]{--ph:30em}
+.tilt[data-n="5"],.tilt[data-n="6"]{--ph:14em}
+.land .pside .tilt{flex:1;display:grid;grid-template-columns:1fr 1fr;align-content:center;--ph:15em;padding:2em}
+.land .pside .tilt[data-n="1"]{grid-template-columns:1fr;--ph:34em;padding:2em 6em}
+.land .pside .tilt[data-n="2"]{grid-template-columns:1fr;--ph:16em;padding:1em 7em;gap:2em}
+.land.paper-loud .stitle{font-size:3.2em}
+
+/* badge: conference lanyard badges hanging from the top of their row */
+.badges{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--bc,var(--n)),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:2.4em}
+.badges[data-n="1"]{--n:1;padding:0 22%}
+.badges[data-n="2"]{--n:2;padding:0 6%}
+.badges[data-n="3"]{--n:3}
+.badges[data-n="4"]{--n:4}
+.badges[data-n="5"],.badges[data-n="6"]{--n:3}
+.badge{display:flex;flex-direction:column;align-items:center;min-width:0;min-height:0;height:100%}
+.strap{flex:1 1 auto;width:3.6em;min-height:5em;background:var(--red);border-radius:0 0 .6em .6em}
+.tag{width:100%;flex:0 1 auto;min-height:0;padding:0;margin-top:-1.2em;align-items:stretch}
+.bv{position:relative;background:var(--red);color:#fff;font-size:2.4em;font-weight:800;letter-spacing:-.01em;text-align:center;padding:1.6em .8em .7em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot{position:absolute;left:50%;top:.55em;width:3.4em;height:.7em;margin-left:-1.7em;border-radius:99em;background:var(--paper)}
+.tag .av{flex:0 1 auto;width:100%;height:auto;aspect-ratio:1;min-height:0;border-radius:0}
+.who2{padding:1.8em 2em 2.2em;text-align:center}
+.who2 b{display:block;font-size:2.8em;font-weight:800;line-height:1.12;letter-spacing:-.015em}
+.who2 i{display:block;font-style:normal;font-size:2em;font-weight:800;color:var(--red);margin-top:.3em}
+.badges[data-n="1"] .who2 b,.badges[data-n="2"] .who2 b{font-size:3.6em}
+.paper-badge .h1{font-size:5.6em}
+.land .pside .badges{--bc:2;align-content:center}
+.land .pside .badges[data-n="1"]{--bc:1;padding:0 14%}
+.land .pside .badges[data-n="3"],.land .pside .badges[data-n="4"]{--bc:2}
+.land .pside .badges{grid-auto-rows:minmax(0,1fr);align-items:stretch}
+.land .pside .badges[data-n="1"],.land .pside .badges[data-n="2"]{grid-template-columns:repeat(var(--bc),minmax(0,1fr))}
+.land .pside .tag{flex:1 1 0}
+.land .pside .tag .av{flex:1 1 0;width:auto;max-width:100%;align-self:center}
+.land .pside .badges[data-n="3"] .who2,.land .pside .badges[data-n="4"] .who2{padding:1em 1.4em 1.2em}
+.land .pside .strap{flex:none;height:4em;min-height:0}
+.land .pside .badges[data-n="3"] .strap,.land .pside .badges[data-n="4"] .strap{height:2.4em}
+
 /* ---------- welcome ---------- */
 .welcome .ppl{flex:1;align-content:start;--ph:28em}
 .welcome .ppl[data-n="1"]{--ph:46em}

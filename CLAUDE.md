@@ -32,7 +32,7 @@ A static web app that makes social-media posters for **DAISY Lab** (Data and Int
 ## Post schema
 | type | Fields |
 |---|---|
-| `paper` | `venue {short, year, full, note}`, `split?`, `papers: [{ title, venue?, authors[], advisors[] }]` |
+| `paper` | `venue {short, year, full, note, rank?}`, `layout?` (`''` classic · `hero` · `spot` · `type` · `page` · `motif` · `loud` · `badge`, single paper only), `status?` (`accepted`·`presented`·`published`), `award?`, `photos[]?` (as in `photo`, used by `hero`), `split?`, `papers: [{ title, venue?, authors[], advisors[] }]` |
 | `welcome` | `title?` (empty → written from the head count), `subtitle?`, `term?`, `members[]` (with `interest`) |
 | `event` | `tag`, `format?`, `title`, `desc?`, `speakers[]`, `date: YYYY-MM-DD`, `time`, `place` |
 | `recruit` | `headline`, `term?`, `intro?`, `areas[]`, `requirements[]`, `contact`, `deadline` |
@@ -53,6 +53,7 @@ Old posts may still carry `lang` or `*word*` markup; both are ignored (asterisks
 ## Design (v5)
 Portrait, top to bottom: **header** (DAISY logo left, PTIT right) · **pills** (1–2 bold uppercase labels such as `PAPER ACCEPTED`, `ORAL`) · **big headline** · **cards** (radius 2.8em, flat red / ink / white) · **footer** (url + lab name).
 - People are always clearly visible: photo + name ≥ 30px. Paper/award with ≤ 2 people: red venue card + dark people card side by side; ≥ 3 people: full-width red card + a row of white person cards (`placePeople()`).
+- Single-paper layouts (`post.layout`): **classic** venue card + people; **hero** conference photos (≤3, draggable like the photo frame, `shots()`) on top, venue + author chips below; **spot** first author as a big portrait card beside the venue, the rest as a text `.byline`; **type** no photos, giant stacked venue name, names as `.byline`; **page** proceedings page: masthead (photos or red venue field) over a 42% axis, side notes (venue/rank/session/award) left, title + round-avatar `.alist` right; **motif** the topic glyph at poster scale in red tones on the paper, cropped bottom-right of `.bd`, names bottom-left clear of it; **loud** one red field, status word + venue sized to fill the width (`--len`), people as tilted white cards; **badge** a conference lanyard badge per person, straps grow to fill the height. Pills (`paperPills()`): status · note · rank · award.
 - Multi-paper posts: up to 4 papers in one image (`post.split` → album pages of 3 / 2), each paper a white card with title and photo chips.
 - Landscape (`.land`, W/H > 1.2): `.cv` becomes a 2-column grid; the template's `side` (people / paper list / member grid / speaker / lists) is the right column `.pside`, everything else stays on the left.
 - **People photo size follows the space**: avatars in the dark people card and in paper chips have no fixed size per head count; they flex into the room the card has (`aspect-ratio:1`, capped by the column width via `cqw`), so fewer people → bigger photos. Do not size them from `cqh` arithmetic: `fit()` can't fix an overflow that doesn't shrink with `--k`.

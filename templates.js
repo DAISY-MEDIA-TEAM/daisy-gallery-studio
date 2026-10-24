@@ -15,8 +15,9 @@ const RATIOS = {
 };
 
 const T = {
-  accepted: 'Paper accepted', papers: n => `${n} papers accepted`,
-  advisor: 'Advisor', welcomeP: 'Welcome',
+  status: { accepted: 'accepted', presented: 'presented', published: 'published' },
+  paper: st => `Paper ${T.status[st] || T.status.accepted}`, papers: (n, st) => `${n} papers ${T.status[st] || T.status.accepted}`,
+  advisor: 'Advisor', author: 'Author', welcomeP: 'Welcome',
   welcome: n => n > 1 ? `Welcome to our ${n} new members` : 'Welcome to our new member',
   areas: 'Research areas', req: 'Requirements', apply: 'Apply at', deadline: 'Deadline', recruiting: "We're recruiting",
   congrats: 'Congratulations', speaker: 'Speaker', seminar: 'Seminar',
@@ -147,21 +148,80 @@ const placePeople = (list, ctx, sub) => ctx.land ? { beside: '', below: '', side
 // at least 2 columns, so 1 and 2 people get the same photo size; photos only shrink from 3 people (landscape is always 2 columns)
 const chipVars = n => `--c:${Math.max(2, Math.min(n, 4))}`;
 
+// photo cells shared by the photo frame and the paper hero (data-i = index in post.photos, for drag/zoom in the editor)
+const shots = list => `<div class="shots" data-n="${list.length}">${list.map(s => `<div class="shot" data-i="${s.i}" style="--px:${+(s.x ?? 50)}%;--py:${+(s.y ?? 40)}%;--pz:${+s.z || 1}"><img src="${esc(s.src)}" alt=""></div>`).join('')}</div>`;
+const shotList = arr => (arr || []).map((s, i) => ({ ...(typeof s === 'string' ? { src: s } : s), i }));
+// status · presentation type · venue rank · paper award
+const paperPills = (p, label) => pills([label], p.venue?.note && [esc(p.venue.note), 'red'], p.venue?.rank && [esc(p.venue.rank)], p.award && [esc(p.award), 'red']);
+// authors and advisors as one line of text (spotlight, typographic)
+const byline = crew => crew.length ? `<p class="byline">${crew.map(x => `<span><b>${esc(x.p.name)}</b>${x.adv ? `<i>${T.advisor}</i>` : ''}</span>`).join('<s>·</s>')}</p>` : '';
+const chipsOf = crew => `<div class="chips" style="${chipVars(crew.length)}">${crew.map(x =>
+  `<span class="chip">${av(x.p)}<span><b>${esc(x.p.name)}</b>${x.adv ? `<i>${T.advisor}</i>` : ''}</span></span>`).join('')}</div>`;
+
 // ---------- templates ----------
 const TPL = {
   paper(p, ctx) {
     const v = p.venue || {}, list = p.papers || [];
     if (list.length === 1) {
       const pp = list[0], short = v.short || pp.venue || '', crew = crewList(pp.authors, pp.advisors);
-      const pl = placePeople(crew, ctx), wide = !ctx.land && crew.length > 2;
-      const len = Math.max(4, wide ? `${short} ${v.year || ''}`.trim().length : Math.max(...[short, v.year].filter(Boolean).map(x => String(x).length)));
-      const venue = `<div class="card red venue end${wide ? ' wide' : ''}">${glyph(topic(pp.title))}
-          <h2 class="vname" style="--len:${len}">${esc(short)}${v.year ? `${wide ? ' ' : '<br>'}<span>${esc(v.year)}</span>` : ''}</h2>
+      const head = paperPills(p, T.paper(p.status)), title = `<h1 class="h1">${rich(pp.title)}</h1>`;
+      const vlen = sep => Math.max(4, sep === ' ' ? `${short} ${v.year || ''}`.trim().length : Math.max(...[short, v.year].filter(Boolean).map(x => String(x).length)));
+      const vcard = (cls, sep) => `<div class="card red venue end ${cls}">${glyph(topic(pp.title))}
+          <h2 class="vname" style="--len:${vlen(sep)}">${esc(short)}${v.year ? `${sep}<span>${esc(v.year)}</span>` : ''}</h2>
           ${v.full ? `<p class="vfull">${esc(v.full)}</p>` : ''}</div>`;
+      // photo hero: conference photos on top, venue + author chips below
+      if (p.layout === 'hero') {
+        const pics = shots(shotList(p.photos).slice(0, 3)), people = crew.length ? `<div class="card white folk">${chipsOf(crew)}</div>` : '';
+        return [{ v: 'paper-hero', side: ctx.land ? pics : '', html: `${head}${ctx.land ? '' : pics}${title}
+          <div class="main">${vcard('', '<br>')}${people}</div>` }];
+      }
+      // spotlight: the first author big, everyone else as a byline
+      if (p.layout === 'spot' && crew.length) {
+        const star = `<div class="card white star">${fig(crew[0])}</div>`;
+        return [{ v: 'paper-spot', side: ctx.land ? star : '', html: `${head}
+          <div class="main">${ctx.land ? '' : star}${vcard('', '<br>')}</div>${title}${byline(crew.slice(1))}` }];
+      }
+      // typographic: no photos, giant venue name, names as text
+      if (p.layout === 'type') {
+        const big = vcard('full', '<br>');
+        return [{ v: 'paper-type', side: ctx.land ? big : '', html: `${head}${ctx.land ? '' : big}${title}${byline(crew)}` }];
+      }
+      const vy = `${esc(short)}${v.year ? ` <span>${esc(v.year)}</span>` : ''}`;
+      const alist = `<div class="alist">${crew.map(x => `<span class="arow">${av(x.p)}<span><b>${esc(x.p.name)}</b>${x.adv ? `<i>${T.advisor}</i>` : ''}</span></span>`).join('')}</div>`;
+      // proceedings page: masthead (photos or red venue field), then a 42% axis — notes left, title + authors right
+      if (p.layout === 'page') {
+        const ph = shotList(p.photos).slice(0, 3);
+        const mast = ph.length ? shots(ph) : `<div class="card red mast end">${glyph(topic(pp.title))}<h2 class="vname" style="--len:${vlen(' ')}">${vy}</h2></div>`;
+        const notes = [['Venue', v.full || join(short, v.year)], ['Rank', v.rank], ['Session', v.note], ['Award', p.award]].filter(x => x[1]);
+        return [{ v: 'paper-page', side: ctx.land ? mast : '', html: `${pills([T.paper(p.status)])}${ctx.land ? '' : mast}
+          <div class="axis"><div class="notes">${notes.map(([k, x]) => `<p><span>${k}</span>${esc(x)}</p>`).join('')}</div>
+          <div class="copy">${title}${alist}</div></div>` }];
+      }
+      // one motif: the field's glyph at poster scale, cropped by the edge, everything else set on the paper
+      if (p.layout === 'motif') {
+        return [{ v: 'paper-motif', side: ctx.land ? alist : '', html: `${glyph(topic(pp.title))}${head}
+          <h2 class="vmotif">${vy}</h2>${title}${ctx.land ? '' : alist}` }];
+      }
+      // loud: a flat red field, the status word filling the width, people stuck on like cut-outs
+      if (p.layout === 'loud') {
+        const word = T.status[p.status] || T.status.accepted;
+        const pics = `<div class="tilt" data-n="${crew.length}">${crew.map(x => `<div class="card white pcard">${fig(x)}</div>`).join('')}</div>`;
+        return [{ v: 'paper-loud', side: ctx.land ? pics : '', html: `${head}<div class="card red shout">
+          <p class="w1" style="--len:${word.length}">${word}</p>
+          <p class="w2" style="--len:${vlen(' ')}">${vy}</p>
+          <p class="stitle">${rich(pp.title)}</p>${ctx.land ? '' : pics}</div>` }];
+      }
+      // badge: every author gets the conference lanyard badge
+      if (p.layout === 'badge') {
+        const badges = `<div class="badges" data-n="${crew.length}">${crew.map(x => `<div class="badge"><span class="strap"></span>
+          <div class="card white tag"><p class="bv"><span class="slot"></span>${esc(join(short, v.year))}</p>${av(x.p)}
+          <div class="who2"><b>${esc(x.p.name)}</b><i>${x.adv ? T.advisor : T.author}</i></div></div></div>`).join('')}</div>`;
+        return [{ v: 'paper-badge', side: ctx.land ? badges : '', html: `${head}${title}${v.full ? `<p class="sub">${esc(v.full)}</p>` : ''}${ctx.land ? '' : badges}` }];
+      }
+      const pl = placePeople(crew, ctx), wide = !ctx.land && crew.length > 2;
       return [{ v: `paper-solo${wide ? ' wide' : ''}`, side: pl.side, html: `
-        ${pills([T.accepted], v.note && [esc(v.note), 'red'])}
-        <h1 class="h1">${rich(pp.title)}</h1>
-        <div class="main">${venue}${pl.beside}</div>${pl.below}` }];
+        ${head}${title}
+        <div class="main">${vcard(wide ? 'wide' : '', wide ? ' ' : '<br>')}${pl.beside}</div>${pl.below}` }];
     }
     const vname = [v.short, v.year].filter(Boolean).join(' ');
     return chunk(list, p.split ? (ctx.land || ctx.key === '1:1' ? 2 : 3) : 4).map(ch => {
@@ -169,14 +229,13 @@ const TPL = {
         <div class="card white pitem">${glyph(topic(pp.title))}
           <p class="ptitle">${rich(pp.title)}</p>
           ${pp.venue ? `<p class="pvenue">${esc(pp.venue)}</p>` : ''}
-          <div class="chips" style="${chipVars(crewList(pp.authors, pp.advisors).length)}">${crewList(pp.authors, pp.advisors).map(x =>
-            `<span class="chip">${av(x.p)}<span><b>${esc(x.p.name)}</b>${x.adv ? `<i>${T.advisor}</i>` : ''}</span></span>`).join('')}</div>
+          ${chipsOf(crewList(pp.authors, pp.advisors))}
         </div>`).join('')}</div>`;
       return { v: 'paper-multi', side: ctx.land ? cards : '', html: `
-        ${pills([T.papers(list.length)], v.note && [esc(v.note), 'red'])}
+        ${paperPills(p, T.papers(list.length, p.status))}
         ${vname ? `<h1 class="h1 big">${esc(vname)}</h1>` : ''}
         ${v.full ? `<p class="sub">${esc(v.full)}</p>` : ''}
-        ${ctx.land ? `<div class="card red mark end">${glyph(topic(list.map(x => x.title).join(' ')))}<p class="day">${list.length}</p><p class="lead">papers accepted</p></div>` : cards}` };
+        ${ctx.land ? `<div class="card red mark end">${glyph(topic(list.map(x => x.title).join(' ')))}<p class="day">${list.length}</p><p class="lead">papers ${T.status[p.status] || T.status.accepted}</p></div>` : cards}` };
     });
   },
 
@@ -238,9 +297,7 @@ const TPL = {
   // photo frame: logos + photos + footer, no text (conference, talks, lab activities)
   // each photo: { src, x, y (focal %), z (zoom) }; old posts store bare dataURL strings
   photo(p) {
-    const list = (p.photos || []).map((s, i) => ({ ...(typeof s === 'string' ? { src: s } : s), i }));
-    return chunk(list, 4).map(ch => ({ v: 'photo', side: '', bleed: true,
-      html: `<div class="shots" data-n="${ch.length}">${ch.map(s => `<div class="shot" data-i="${s.i}" style="--px:${+(s.x ?? 50)}%;--py:${+(s.y ?? 40)}%;--pz:${+s.z || 1}"><img src="${esc(s.src)}" alt=""></div>`).join('')}</div>` }));
+    return chunk(shotList(p.photos), 4).map(ch => ({ v: 'photo', side: '', bleed: true, html: shots(ch) }));
   },
 };
 
@@ -311,20 +368,22 @@ const hashtag = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').re
 
 const CAPTION = {
   paper(p) {
-    const v = p.venue || {}, list = p.papers || [], venue = [v.short, v.year].filter(Boolean).join(' ');
-    const at = venue ? ` tại ${venue}` : '', atEn = venue ? ` at ${venue}` : '', note = v.note ? ` (${v.note})` : '';
+    const v = p.venue || {}, list = p.papers || [], venue = [v.short, v.year].filter(Boolean).join(' ') + (v.rank ? ` (${v.rank})` : '');
+    const st = { presented: ['được trình bày', 'presented'], published: ['được xuất bản', 'published'] }[p.status] || ['được chấp nhận', 'accepted'];
+    const at = venue ? ` tại ${venue}` : '', atEn = venue ? ` ${p.status === 'published' ? 'in' : 'at'} ${venue}` : '', note = v.note ? ` (${v.note})` : '';
     const tags = v.short ? [`#${hashtag(v.short)}${hashtag(v.year)}`] : [];
+    const prize = p.award && `🏆 ${p.award}`;
     if (list.length === 1) {
       const pp = list[0], a = nm(pp.authors), ad = nm(pp.advisors), t = pp.title && `📄 "${plain(pp.title)}"`;
       return { tags,
-        vi: para(`🎉 Chúc mừng! Bài báo của DAISY Lab đã được chấp nhận${at}${note}.`, [t, a && `👥 Tác giả: ${a}`, ad && `🎓 Hướng dẫn: ${ad}`, v.full && `📍 ${v.full}`]),
-        en: para(`🎉 Congratulations! Our paper has been accepted${atEn}${note}.`, [t, a && `👥 Authors: ${a}`, ad && `🎓 Advisors: ${ad}`, v.full && `📍 ${v.full}`]) };
+        vi: para(`🎉 Chúc mừng! Bài báo của DAISY Lab đã ${st[0]}${at}${note}.`, [prize, t, a && `👥 Tác giả: ${a}`, ad && `🎓 Hướng dẫn: ${ad}`, v.full && `📍 ${v.full}`]),
+        en: para(`🎉 Congratulations! Our paper has been ${st[1]}${atEn}${note}.`, [prize, t, a && `👥 Authors: ${a}`, ad && `🎓 Advisors: ${ad}`, v.full && `📍 ${v.full}`]) };
     }
     const items = list.map((pp, i) => [`${i + 1}. "${plain(pp.title)}"${pp.venue ? ` (${pp.venue})` : ''}`,
       `    👥 ${join(nm(pp.authors), nm(pp.advisors) && `🎓 ${nm(pp.advisors)}`)}`]).flat();
     return { tags,
-      vi: para(`🎉 Chúc mừng! DAISY Lab có ${list.length} bài báo được chấp nhận${at}${note}.`, v.full && `📍 ${v.full}`, items),
-      en: para(`🎉 Congratulations! ${list.length} DAISY Lab papers have been accepted${atEn}${note}.`, v.full && `📍 ${v.full}`, items) };
+      vi: para(`🎉 Chúc mừng! DAISY Lab có ${list.length} bài báo ${st[0]}${at}${note}.`, [prize, v.full && `📍 ${v.full}`], items),
+      en: para(`🎉 Congratulations! ${list.length} DAISY Lab papers have been ${st[1]}${atEn}${note}.`, [prize, v.full && `📍 ${v.full}`], items) };
   },
 
   welcome(p) {

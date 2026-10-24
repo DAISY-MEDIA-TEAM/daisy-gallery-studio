@@ -135,6 +135,7 @@ form{display:flex;flex-direction:column;gap:14px}
 </div>
 <datalist id="names"></datalist>
 <datalist id="notes"><option>Oral</option><option>Poster</option><option>Best Paper</option><option>Q1</option><option>Scopus</option></datalist>
+<datalist id="ranks"><option>CORE A*</option><option>CORE A</option><option>CORE B</option><option>Q1</option><option>Q2</option><option>Scopus</option></datalist>
 
 <script>
 const PRESET = window.DAISY_PRESET || { members: {}, examples: [] };
@@ -156,6 +157,11 @@ const FORMS = {
     ['venue.year', 'text', 'Year', { ph: '2026' }],
     ['venue.full', 'textarea', 'Full conference / journal name', { ph: 'International Symposium on Information and Communication Technology' }],
     ['venue.note', 'text', 'Presentation type', { ph: 'Oral, Poster…', list: 'notes' }],
+    ['layout', 'select', 'Layout (single paper)', { options: [['', 'Classic: venue card + people'], ['hero', 'Photo hero: conference photos on top'], ['spot', 'Spotlight: first author big'], ['type', 'Typographic: big venue name, names as text'], ['page', 'Proceedings page: masthead + side notes'], ['motif', 'Motif: the field glyph at poster scale'], ['loud', 'Loud: red street poster, tilted photos'], ['badge', 'Badges: a conference badge per author']] }],
+    ['status', 'select', 'Status', { options: [['accepted', 'Accepted'], ['presented', 'Presented'], ['published', 'Published']] }],
+    ['venue.rank', 'text', 'Venue rank', { ph: 'CORE A*, Q1, Scopus…', list: 'ranks' }],
+    ['award', 'text', 'Paper award', { ph: 'Best Paper Award' }],
+    ['photos', 'photos', 'Conference photos (Photo hero layout, up to 3)'],
     ['split', 'check', 'Split into several images (album) instead of up to 4 papers in one'],
     ['papers', 'list', 'Papers', { add: '+ Add paper', blank: () => ({ title: '', authors: [blankPerson()], advisors: [] }), item: [
       ['title', 'textarea', 'Paper title'],
@@ -449,7 +455,7 @@ function preview() {
     frame.style.cssText = `width:${s.W * scale}px;height:${s.H * scale}px`;
     cv.style.cssText = `--w:${s.W}px;--h:${s.H}px;transform:scale(${scale})`;
     cv.innerHTML = s.html;
-    if (post.type === 'photo') adjustable(cv, post.photos);
+    if (post.photos?.length) adjustable(cv, post.photos);
     frame.append(cv);
     cap.append(h('span', '', `${out.length > 1 ? `Slide ${i + 1}/${out.length} · ` : ''}${s.W * PIXEL_RATIO}×${s.H * PIXEL_RATIO}`), btn('btn sm', 'Export this slide', () => exportOne(cv, s)));
     item.append(frame, cap);
