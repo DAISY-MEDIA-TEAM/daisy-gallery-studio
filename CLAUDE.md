@@ -1,4 +1,4 @@
-# DAISY Post Studio
+# DAISY Gallery Studio
 
 A static web app that makes social-media posters for **DAISY Lab** (Data and Intelligent Systems Lab, PTIT, https://datalab.ptit.edu.vn): accepted papers, new members, seminars/events, recruitment and awards. People fill in a form, upload photos, see a live preview and export PNGs sized for Facebook. No backend. Everything (UI and posters) is in English, except the **Facebook caption** under the preview: Vietnamese block, `—`, English block, hashtags (`CAPTION.<type>` / `caption()` in `templates.js`; a hand edit is stored in `post.caption`, ↺ drops it).
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAISY Post Studio</title>
+<title>DAISY Gallery Studio</title>
 <link rel="icon" href="assets/logo/ptit.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,7 +98,7 @@ form{display:flex;flex-direction:column;gap:14px}
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span id="brandIcon"></span>DAISY <span>Post Studio</span></div>
+  <div class="brand"><span id="brandIcon"></span>DAISY <span>Gallery Studio</span></div>
   <span class="sp"></span>
   <button class="btn" id="open">Open file</button>
   <input type="file" id="openFile" accept=".json,application/json" hidden>
@@ -508,7 +508,7 @@ $('exp').onclick = async e => {
 
 // ---------- file .json ----------
 $('save').onclick = () => {
-  const blob = new Blob([JSON.stringify({ app: 'daisy-post-studio', v: 1, posts: S.posts, library: S.library })], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ app: 'daisy-gallery-studio', v: 1, posts: S.posts, library: S.library })], { type: 'application/json' });
   const a = h('a'); a.href = URL.createObjectURL(blob); a.download = `daisy-studio-${new Date().toISOString().slice(0, 10)}.json`; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
@@ -518,7 +518,7 @@ $('openFile').onchange = async e => {
   if (!f) return;
   try {
     const d = JSON.parse(await f.text());
-    if (!Array.isArray(d.posts) || !d.posts.every(p => p && TPL[p.type])) throw new Error('Not a DAISY Post Studio file');
+    if (!Array.isArray(d.posts) || !d.posts.every(p => p && TPL[p.type])) throw new Error('Not a DAISY Gallery Studio file');
     if (!confirm(`Open ${d.posts.length} posts from the file? Current posts will be replaced (the member library is merged).`)) return;
     S.posts = d.posts; S.library = { ...S.library, ...(d.library && typeof d.library === 'object' ? d.library : {}) }; S.cur = 0;
     refreshLib(); changed(true);

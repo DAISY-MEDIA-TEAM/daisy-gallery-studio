@@ -1,4 +1,4 @@
-// DAISY Post Studio — shared data, deployed with the site.
+// DAISY Gallery Studio — shared data, deployed with the site.
 // People fill everything in through the web form; this file is for admins only:
 //  - members: a member library available to everyone (typing a name fills in photo + role).
 //    Put photos in assets/members/, for example:

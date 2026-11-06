@@ -1,4 +1,4 @@
-# DAISY Post Studio
+# DAISY Gallery Studio
 
 Static web app that makes Facebook posters for DAISY Lab (Data and Intelligent Systems Lab, PTIT): accepted papers, new members, seminars, recruitment, awards and photo frames.
 
