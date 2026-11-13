@@ -288,6 +288,7 @@
 .lists li{font-size:2.4em;line-height:1.4}
 .cta{flex:none;flex-direction:row;align-items:flex-end;justify-content:space-between;gap:3em;padding:3.6em 4em}
 .cta .dl{text-align:right;flex:none}
+.cta .qr{flex:none;width:17em;height:17em;padding:1.2em;background:#fff;border-radius:1.6em;object-fit:contain;position:relative}
 
 /* ---------- award ---------- */
 .award .main{flex:1}

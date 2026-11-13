@@ -35,7 +35,7 @@ A static web app that makes social-media posters for **DAISY Lab** (Data and Int
 | `paper` | `venue {short, year, full, note, rank?}`, `layout?` (`''` classic · `hero` · `spot` · `type` · `page` · `motif` · `loud` · `badge`, single paper only), `status?` (`accepted`·`presented`·`published`), `award?`, `photos[]?` (as in `photo`, used by `hero`), `split?`, `papers: [{ title, venue?, authors[], advisors[] }]` |
 | `welcome` | `title?` (empty → written from the head count), `subtitle?`, `term?`, `members[]` (with `interest`) |
 | `event` | `tag`, `format?`, `title`, `desc?`, `speakers[]`, `date: YYYY-MM-DD`, `time`, `place` |
-| `recruit` | `headline`, `term?`, `intro?`, `areas[]`, `requirements[]`, `contact`, `deadline` |
+| `recruit` | `headline`, `term?`, `intro?`, `areas[]`, `requirements[]`, `contact`, `qr?` (image dataURL, stored as uploaded), `deadline` |
 | `award` | `award`, `event?`, `project?`, `members[]`, `advisors[]` |
 | `photo` | `photos[]: { src, x?, y?, z? }` (src = JPEG dataURL, long edge ≤ 2000px; x/y focal % default 50/40, z zoom 1–4; legacy bare strings accepted, upgraded by `shotAt()`). Drag on the preview moves, wheel / form slider zooms. `what? place? date?` feed the caption only. Photo frame: header logos + photos + footer, no text; 1–4 per image (1 full · 2 stacked · 3 = 1 big + 2 · 4 = 2×2), more → album via `chunk()` |
 
@@ -66,6 +66,6 @@ Portrait, top to bottom: **header** (DAISY logo left, PTIT right) · **pills** (
 ## Adding a template
 1. `templates.js`: `TPL.<type>(post, ctx)` returns `[{ v, html, side }]` (one per slide). `v` = layout class, `side` = right column in landscape (render it inline in `html` when `!ctx.land`).
 2. `templates.css`: style with em, reuse `.pills .h1 .sub .card .crew .ppl .pcard .person .av`.
-3. `index.html`: add to `TYPES`, `FORMS` (field kinds `text | textarea | select | date | check | lines | list | people | photos`) and `BLANK`.
+3. `index.html`: add to `TYPES`, `FORMS` (field kinds `text | textarea | select | date | check | lines | list | people | photos | image`) and `BLANK`.
 4. `templates.js`: add `CAPTION.<type>(post)` returning `{ vi, en, tags? }` (build with `para()`).
 5. Check all 5 ratios; a slide whose `--k` hits 0.5 is overflowing.

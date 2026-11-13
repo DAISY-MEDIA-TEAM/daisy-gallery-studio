@@ -280,6 +280,7 @@ const TPL = {
       ${p.intro ? `<p class="sub">${rich(p.intro)}</p>` : ''}
       ${ctx.land ? '' : lists}
       <div class="card red cta">${glyph(topic((p.areas || []).join(' ')))}
+        ${p.qr ? `<img class="qr" src="${p.qr}" alt="">` : ''}
         ${p.contact ? `<div><p class="small">${T.apply}</p><p class="big">${esc(p.contact)}</p></div>` : ''}
         ${p.deadline ? `<div class="dl"><p class="small">${T.deadline}</p><p class="lead">${esc(p.deadline)}</p></div>` : ''}
       </div>` }];

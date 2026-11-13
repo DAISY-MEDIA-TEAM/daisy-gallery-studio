@@ -64,6 +64,7 @@ form{display:flex;flex-direction:column;gap:14px}
 .thumb{display:flex;flex-direction:column;gap:4px}
 .thumb .pic{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--cream)}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.qrthumb img{width:96px;height:96px;object-fit:contain;background:#fff;border-radius:8px}
 .thumb .zoom{display:flex;gap:4px;align-items:center}
 .thumb .zoom input{flex:1;min-width:0;padding:0;border:0;accent-color:var(--red)}
 .frame .shot{cursor:grab;touch-action:none}
@@ -190,6 +191,7 @@ const FORMS = {
     ['areas', 'lines', 'Research areas (one per line)'],
     ['requirements', 'lines', 'Requirements (one per line)'],
     ['contact', 'text', 'Contact / application link'],
+    ['qr', 'image', 'QR code (scan to apply)'],
     ['deadline', 'text', 'Deadline']],
   award: [
     ['award', 'text', 'Award', { ph: 'Second Prize' }],
@@ -348,6 +350,16 @@ function field(obj, path, kind, label, o = {}) {
     };
     wrap.append(grid, fi, btn('btn sm', '+ Add photos', () => fi.click()));
     if (arr.length) wrap.append(h('p', 'hint', 'Drag a photo on the preview to move it; scroll or use the slider to zoom.'));
+    return wrap;
+  }
+  if (kind === 'image') {
+    const fi = h('input'), v = getP(obj, path);
+    fi.type = 'file'; fi.accept = 'image/*'; fi.hidden = true;
+    // ponytail: stored as-is (no JPEG re-encode) so QR edges stay sharp
+    fi.onchange = () => { const r = new FileReader(); r.onload = () => { setP(obj, path, r.result); changed(true); }; r.readAsDataURL(fi.files[0]); };
+    if (v) { const t = h('div', 'thumb qrthumb'), img = h('img'); img.src = v; img.alt = ''; t.append(img); wrap.append(t); }
+    wrap.append(fi, btn('btn sm', v ? 'Replace image' : '+ Add image', () => fi.click()));
+    if (v) wrap.append(btn('btn sm', 'Remove', () => { setP(obj, path, ''); changed(true); }));
     return wrap;
   }
   if (kind === 'check') {
