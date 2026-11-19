@@ -148,7 +148,7 @@ const RATIO_INFO = {
   '16:9': 'Landscape · screens, slides, event covers',
   '3:2': 'Landscape · taller, fits more people',
 };
-const TYPES = { paper: 'Accepted paper', welcome: 'New members', event: 'Seminar / event', recruit: 'Recruitment', award: 'Award', photo: 'Photos (conference, talk, activity)' };
+const TYPES = { paper: 'Accepted paper', welcome: 'New members', event: 'Seminar / event', recruit: 'Recruitment', remind: 'Deadline reminder', award: 'Award', photo: 'Photos (conference, talk, activity)' };
 
 // ---------- form schema: [path, kind, label, opts] ----------
 const blankPerson = () => ({ name: '', role: '' });
@@ -193,6 +193,16 @@ const FORMS = {
     ['contact', 'text', 'Contact / application link'],
     ['qr', 'image', 'QR code (scan to apply)'],
     ['deadline', 'text', 'Deadline']],
+  remind: [
+    ['headline', 'text', 'Headline', { ph: 'Last call to join DAISY Lab' }],
+    ['term', 'text', 'Intake', { ph: 'Fall 2026' }],
+    ['n', 'text', 'Time left: number (empty = days until the close date)', { ph: '3' }],
+    ['unit', 'select', 'Unit', { options: [['days', 'Days'], ['hours', 'Hours'], ['weeks', 'Weeks']] }],
+    ['closes', 'date', 'Applications close on'],
+    ['time', 'text', 'Closing time', { ph: '23:59' }],
+    ['contact', 'text', 'Application link'],
+    ['qr', 'image', 'QR code (scan to apply)'],
+    ['note', 'textarea', 'Extra line (caption only)']],
   award: [
     ['award', 'text', 'Award', { ph: 'Second Prize' }],
     ['event', 'text', 'Competition'],
@@ -210,6 +220,8 @@ const BLANK = {
   welcome: () => ({ title: '', members: [blankPerson()] }),
   event: () => ({ speakers: [blankPerson()] }),
   recruit: () => ({ headline: 'Join DAISY Lab', areas: [], requirements: [] }),
+  // prefilled from the latest recruitment post: same intake, link and QR
+  remind: () => { const r = S.posts.findLast(p => p.type === 'recruit') || {}; return { headline: 'Last call to join DAISY Lab', term: r.term, contact: r.contact, qr: r.qr }; },
   award: () => ({ members: [blankPerson()], advisors: [] }),
   photo: () => ({ photos: [] }),
 };

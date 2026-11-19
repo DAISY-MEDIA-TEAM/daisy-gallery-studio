@@ -20,6 +20,8 @@ const T = {
   advisor: 'Advisor', author: 'Author', welcomeP: 'Welcome',
   welcome: n => n > 1 ? `Welcome to our ${n} new members` : 'Welcome to our new member',
   areas: 'Research areas', req: 'Requirements', apply: 'Apply at', deadline: 'Deadline', recruiting: "We're recruiting",
+  closing: 'Applications closing', closes: 'Applications close', left: 'left',
+  units: { days: ['day', 'days'], hours: ['hour', 'hours'], weeks: ['week', 'weeks'] },
   congrats: 'Congratulations', speaker: 'Speaker', seminar: 'Seminar',
   lab: 'Data and Intelligent Systems Lab', locale: 'en-US',
 };
@@ -158,6 +160,14 @@ const byline = crew => crew.length ? `<p class="byline">${crew.map(x => `<span><
 const chipsOf = crew => `<div class="chips" style="${chipVars(crew.length)}">${crew.map(x =>
   `<span class="chip">${av(x.p)}<span><b>${esc(x.p.name)}</b>${x.adv ? `<i>${T.advisor}</i>` : ''}</span></span>`).join('')}</div>`;
 
+// reminder: [number, unit]; no number typed → whole days from today to the close date
+const countdown = p => {
+  const unit = T.units[p.unit] ? p.unit : 'days';
+  if (String(p.n ?? '').trim()) return [String(p.n).trim(), unit];
+  if (!p.closes) return ['', unit];
+  return [String(Math.max(0, Math.ceil((new Date(p.closes + 'T00:00') - new Date().setHours(0, 0, 0, 0)) / 864e5))), 'days'];
+};
+
 // ---------- templates ----------
 const TPL = {
   paper(p, ctx) {
@@ -286,6 +296,23 @@ const TPL = {
       </div>` }];
   },
 
+  // deadline reminder: a giant countdown, close date + apply card (QR)
+  remind(p, ctx) {
+    const [n, unit] = countdown(p), d = p.closes ? new Date(p.closes + 'T00:00') : null;
+    const cards = `<div class="main rcards">
+        ${d ? `<div class="card ink rdate end"><p class="small">${T.closes}</p><p class="big">${esc(d.toLocaleDateString(T.locale, { month: 'short', day: 'numeric' }))}</p>
+          <p class="small">${esc(join(d.toLocaleDateString(T.locale, { weekday: 'long' }), p.time))}</p></div>` : ''}
+        ${p.qr || p.contact ? `<div class="card white rapply">${p.qr ? `<img class="qr" src="${p.qr}" alt="">` : ''}
+          ${p.contact ? `<div><p class="small">${T.apply}</p><p class="lead">${esc(p.contact)}</p></div>` : ''}</div>` : ''}
+      </div>`;
+    return [{ v: 'remind', side: ctx.land ? cards : '', html: `
+      ${pills([T.closing], p.term && [esc(p.term), 'red'])}
+      <h1 class="h1">${rich(p.headline)}</h1>
+      <div class="card red tick end">${n !== '' ? `<p class="count"><span class="n" style="--len:${String(n).length}">${esc(n)}</span>
+        <span class="u">${esc(T.units[unit][+n === 1 ? 0 : 1])}<br>${T.left}</span></p>` : ''}</div>
+      ${ctx.land ? '' : cards}` }];
+  },
+
   award(p, ctx) {
     const crew = crewList(p.members, p.advisors), pl = placePeople(crew, ctx);
     return [{ v: 'award', side: pl.side, html: `
@@ -409,6 +436,16 @@ const CAPTION = {
         [p.contact && `📝 Đăng ký: ${p.contact}`, p.deadline && `⏰ Hạn đăng ký: ${p.deadline}`]),
       en: para(`🔎 ${plain(p.headline) || T.recruiting}${p.term ? ` – ${p.term}` : ''}`, plain(p.intro), bullets(`${T.areas}:`, p.areas), bullets(`${T.req}:`, p.requirements),
         [p.contact && `📝 ${T.apply}: ${p.contact}`, p.deadline && `⏰ ${T.deadline}: ${p.deadline}`]) };
+  },
+
+  remind(p) {
+    const [n, unit] = countdown(p), vi = { days: 'ngày', hours: 'giờ', weeks: 'tuần' }[unit], en = `${n} ${T.units[unit][+n === 1 ? 0 : 1]}`;
+    const term = p.term ? ` ${p.term}` : '', at = d => join(p.time, d);
+    return {
+      vi: para(`⏰ ${n ? `Chỉ còn ${n} ${vi}! ` : ''}DAISY Lab sắp đóng đơn đăng ký thành viên${term}.`, plain(p.note),
+        [p.closes && `📅 Hạn chót: ${at(day(p.closes, 'vi-VN', 1))}`, p.contact && `📝 Đăng ký: ${p.contact}`], 'Đừng bỏ lỡ nhé!'),
+      en: para(`⏰ ${n ? `Only ${en} left! ` : ''}${plain(p.headline) || 'Applications to DAISY Lab are closing soon'}${p.term ? ` – ${p.term}` : ''}.`,
+        [p.closes && `📅 ${T.closes}: ${at(day(p.closes, T.locale, 1))}`, p.contact && `📝 ${T.apply}: ${p.contact}`], "Don't miss it!") };
   },
 
   award(p) {

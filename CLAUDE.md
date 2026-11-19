@@ -36,6 +36,7 @@ A static web app that makes social-media posters for **DAISY Lab** (Data and Int
 | `welcome` | `title?` (empty → written from the head count), `subtitle?`, `term?`, `members[]` (with `interest`) |
 | `event` | `tag`, `format?`, `title`, `desc?`, `speakers[]`, `date: YYYY-MM-DD`, `time`, `place` |
 | `recruit` | `headline`, `term?`, `intro?`, `areas[]`, `requirements[]`, `contact`, `qr?` (image dataURL, stored as uploaded), `deadline` |
+| `remind` | `headline`, `term?`, `n?` + `unit` (`days`·`hours`·`weeks`; empty `n` → days from today to `closes`, `countdown()`), `closes: YYYY-MM-DD`, `time?`, `contact?`, `qr?`, `note?` (caption only). New ones copy term/contact/qr from the latest recruit post |
 | `award` | `award`, `event?`, `project?`, `members[]`, `advisors[]` |
 | `photo` | `photos[]: { src, x?, y?, z? }` (src = JPEG dataURL, long edge ≤ 2000px; x/y focal % default 50/40, z zoom 1–4; legacy bare strings accepted, upgraded by `shotAt()`). Drag on the preview moves, wheel / form slider zooms. `what? place? date?` feed the caption only. Photo frame: header logos + photos + footer, no text; 1–4 per image (1 full · 2 stacked · 3 = 1 big + 2 · 4 = 2×2), more → album via `chunk()` |
 

@@ -290,6 +290,21 @@
 .cta .dl{text-align:right;flex:none}
 .cta .qr{flex:none;width:17em;height:17em;padding:1.2em;background:#fff;border-radius:1.6em;object-fit:contain;position:relative}
 
+/* ---------- deadline reminder: giant countdown on red, close date + apply below ---------- */
+/* .count clips: at line-height .8 the empty descent of a 46em digit would read as overflow in fit() */
+.tick{flex:1;container-type:inline-size;padding:3em 4em 3.6em}
+.count{display:flex;align-items:flex-end;overflow:hidden;gap:.6em;font-weight:900;letter-spacing:-.05em;line-height:.8}
+.count .n{font-size:min(46em, calc(var(--k) * 66cqw / (var(--len) * .6)));margin-left:-.05em}
+.count .u{font-size:min(11em, calc(var(--k) * 15cqw));text-transform:uppercase;line-height:.86;padding-bottom:.12em}
+.rcards{flex:none}
+.rdate{flex:1;gap:.4em}
+.rdate .big{font-size:7em}
+.rapply{flex:1.3;flex-direction:row;align-items:center;gap:3em;padding:3em}
+.rapply .qr{flex:none;width:17em;height:17em;object-fit:contain}
+.rapply .lead{overflow-wrap:anywhere}
+.land .pside .rcards{flex:1;flex-direction:column}
+.land .pside .rapply{flex-direction:column;align-items:flex-start;justify-content:flex-end}
+
 /* ---------- award ---------- */
 .award .main{flex:1}
 .proj{flex:1}
